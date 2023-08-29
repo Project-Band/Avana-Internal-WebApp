@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile</title>
+</head>
+<body>
+    <h1>User Profile</h1>
+    <p>First Name: {{ employee.first_name }}</p>
+    <p>Middle Name: {{ employee.middle_name }}</p>
+    <p>Last Name: {{ employee.last_name }}</p>
+    <p>Home Address: {{ employee.home_address }}</p>
+    <p>Phone Number: {{ employee.phone_number }}</p>
+    <p>Gender: {{ employee.get_gender_display }}</p>
+    <!-- <img src="{{ employee.profile_image.url }}" alt="Profile Image"> -->
+</body>
+</html>

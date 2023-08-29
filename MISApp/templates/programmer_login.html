@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <a href="{% url 'homepage' %}">Homepage</a>
+    <title>Programmer Login</title>
+</head>
+<body>
+    <h1>Programmer Login</h1>
+    <!-- Add your login form here -->
+    {% if messages %}     
+        {% for message in messages %}
+            <div>{{ message }}</div>
+        {% endfor %}              
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <!-- Username -->
+        <label for="id_username">Username: *</label>
+        <input type="text" id="id_username" name="username" required>
+        <br>
+
+        <!-- Password-->
+        <label for="id_password">Password: *</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <p> You agreed to the terms and conditions.</p>
+        <input type="submit" value="Register">
+    <a href="{% url 'register' %}"><button>Don't have an account?</button></a>
+</body>
+</html>

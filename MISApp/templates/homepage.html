@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MIS Homepage</title>
+</head>
+<body>
+
+    <span>Logo</span><h1>Avana Game Studio LLC</h1>
+    
+    <a href="{% url 'admin_login' %}"><button>Admin Login</button></a>
+    <a href="{% url 'register' %}"><button>Programmer Register</button></a>
+    <a href="{% url 'login' %}"><button>Programmer Login</button></a>
+
+    <!-- Display Architect Users -->
+    <h2>Architect Users</h2>
+    <ul>
+        {% for user in architect_users %}
+            <li>{{ user.first_name }} {{ user.last_name }}</li>
+        {% empty %}
+            <li>No Architect Users</li>
+        {% endfor %}
+    </ul>
+    
+    <!-- Display Programmer Users -->
+    <h2>Programmer Users</h2>
+    <ul>
+        {% for user in programmer_users %}
+            <li>{{ user.first_name }} {{ user.last_name }}</li>
+        {% empty %}
+            <li>No Programmer Users</li>
+        {% endfor %}
+    </ul>
+    
+    <div>Copyright</div>
+</body>
+</html>
