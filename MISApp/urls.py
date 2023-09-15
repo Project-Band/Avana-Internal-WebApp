@@ -3,6 +3,16 @@
 from django.urls import path
 from . import views
 
+
+# urls.py
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import EmployeeViewSet
+
+router = DefaultRouter()
+router.register(r'employees', EmployeeViewSet)
+
+
 urlpatterns = [
     path('', views.display_homepage, name = 'homepage'),
     path('register/', views.programmer_signup, name='register'),
@@ -14,4 +24,6 @@ urlpatterns = [
     path('error/', views.error_page, name = 'error'),
     
     path('user/<int:user_id>/', views.user_profile, name='user_profile'),
+    
+    path('api/', include(router.urls)),
 ]

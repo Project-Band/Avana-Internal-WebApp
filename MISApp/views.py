@@ -116,7 +116,6 @@ def email_validation(request):
     context = {}
     return render(request, 'email_validation.html', context=context)
 
-
 def verify(request, auth_token):
     try:
         employee = Employee.objects.filter(auth_token = auth_token).first()
@@ -153,3 +152,11 @@ def send_email_after_registration(email, token):
     send_mail(subject=subject, message=message, from_email=email_from, recipient_list=recepient_list)
     
     
+# views.py
+from rest_framework import viewsets
+from .models import Employee
+from .serializers import EmployeeSerializer
+
+class EmployeeViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer

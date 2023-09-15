@@ -9,19 +9,22 @@ GENDER_CHOICES =[
 ]
 
 USER_STATUS_CHOICES = [
+    ('A', "Admin"),
     ('P', "Programmer"),
     ('A', "Architects"),
     ('W', "Waiting Approval"),
 ]
 
 PROJECT_STATUS = [
-        ('A', "Active"),
+        ('A', "Available"),
+        ('P', "Pending"),
         ('C', "Completed"),
         ('S', 'Scrapped'),
     ]
 ENROLLMENT_STATUS = [
         ('R', "Requested"),
         ('A', "Approved"),
+        ('D', "Denied"),
     ]
 # Employee Model
 class Employee(models.Model):
@@ -51,13 +54,27 @@ class Project(models.Model):
     project_end_date = models.DateField()
     project_status = models.CharField(max_length=1, choices=PROJECT_STATUS, default = 'A')
     
+    # Employees
+    employees = models.ManyToManyField(Employee, through= 'ProjectEnroll')
+    def __str__(self):
+        return self.project_name
+    
 # Terms and Conditions Model
-class TermsAndConditions(models.Model):
+class TermsAndCondition(models.Model):
     title = models.CharField(max_length=50)
     clause = models.CharField(max_length=1000)
     
+    def __str__(self):
+        return self.title
+    
 # Enroll Model
 class ProjectEnroll(models.Model):
-    Employee = models.ForeignKey(Employee)
-    Project = models.ForeignKey(Project)
+    Employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    Project = models.ForeignKey(Project, on_delete=models.CASCADE)
     enrollmentStatus = models.CharField(max_length=1, choices=ENROLLMENT_STATUS, default = 'R')
+    
+    def __str__(self) -> str:
+        return str(self.Employee) + str(self.Project)
+
+    class Meta:
+        unique_together = ('Employee', 'Project')
