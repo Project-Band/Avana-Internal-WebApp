@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #ccc;
+  border-radius: 116px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 116px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+@layer base{
+  div{
+    @apply box-border
+  }
+
+  body {
+    @apply bg-white100
+  }
+  
+  .main{
+    @apply w-full mx-auto px-6
+  }
+
+  .buttons{
+    @apply flex shadow-md border h-max gap-2 py-3 px-4 rounded-full items-center cursor-pointer hover:scale-105
+  }
+
+  .formLabel{
+    @apply block text-base text-primary
+  }
+
+  .formInput{
+    @apply py-1 bg-white50 border-b-2 w-full focus:outline-none appearance-none
+  }
+
+  .adminContent{
+    @apply bg-white50 w-full h-[568px] pl-8 pr-3 py-4 rounded-sm shadow-lg
+  }
+
+  p{
+    @apply text-black150 text-base
+  }
+
+  h1{
+    @apply text-3xl text-black150
+  }
+
+  h2{
+    @apply text-2xl text-black150
+  }
+
+  h3{
+    @apply text-xl text-black150
+  }
+
+  h4{
+    @apply text-lg text-black150
+  }
+
+}
+
