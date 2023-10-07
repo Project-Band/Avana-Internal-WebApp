@@ -9,7 +9,7 @@ GENDER_CHOICES =[
 ]
 
 USER_STATUS_CHOICES = [
-    ('A', "Admin"),
+    ('X', "Admin"),
     ('P', "Programmer"),
     ('A', "Architects"),
     ('W', "Waiting Approval"),

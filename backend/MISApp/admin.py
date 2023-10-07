@@ -50,7 +50,7 @@ admin.site.register(models.Project, ProjectAdmin)
 
 class TnCAdmin(admin.ModelAdmin):
     list_display = ['title']
-admin.site.register(models.TermsAndConditions, TnCAdmin)
+admin.site.register(models.TermsAndCondition, TnCAdmin)
 
 class EnrollAdmin(admin.ModelAdmin):
     list_display = ['enrollmentStatus', 'Project', 'Employee']

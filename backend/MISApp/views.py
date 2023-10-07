@@ -1,8 +1,41 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from rest_framework import generics
+from rest_framework.response import Response
+from .models import *
+from .serializers import *
+
+class HomePageAPIView(generics.ListAPIView):
+    
+    serializer_class = EmployeeSerializer
+    
+    def list(self, request, *args, **kwargs):
+        architect_users = Employee.objects.filter(user_status='A')
+        programmer_users = Employee.objects.filter(user_status='P')
+
+        architect_serializer = self.get_serializer(architect_users, many=True)
+        programmer_serializer = self.get_serializer(programmer_users, many=True)
+
+        return Response({
+            'programmers': programmer_serializer.data,
+            'architects': architect_serializer.data
+        })
+        
+class ApplicationAPIView(generics.ListAPIView):
+    
+    serializer_class = ApplicationSerializer
+    
+    def list(self, request, *args, **kwargs):
+        return Response(Employee.objects.filter(user_status='W'))
+
+class TermsAndConditionListView(generics.ListAPIView):
+    queryset = TermsAndCondition.objects.all()
+    serializer_class = TermsAndConditionSerializer
+
+
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.models import User
-from .models import *
+
 import uuid
 from django.conf import settings
 from django.core.mail import send_mail, send_mass_mail
