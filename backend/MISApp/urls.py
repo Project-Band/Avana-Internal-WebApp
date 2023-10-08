@@ -20,7 +20,10 @@ urlpatterns = [
     path('application/', views.ApplicationAPIView.as_view(), name = 'HomePage'),
     # Terms and Conditions
     path('terms-and-conditions/', TermsAndConditionListView.as_view(), name='terms_and_conditions_list'),
-    
+    # Register
+     path('registerinfo/', ProgrammerRegistrationView.as_view(), name='programmer_registration'),
+    # api
+    path('api/', include(router.urls)),
 ]
 
 # urlpatterns = [
@@ -38,5 +41,5 @@ urlpatterns = [
     
 #     path('user/<int:user_id>/', views.user_profile, name='user_profile'),
     
-#     path('api/', include(router.urls)),
+#     
 # ]

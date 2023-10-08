@@ -1,6 +1,7 @@
 # serializers.py
 from rest_framework import serializers
-from .models import Employee, TermsAndCondition
+from .models import Employee, TermsAndCondition, GENDER_CHOICES
+
 
 class EmployeeSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
@@ -43,3 +44,31 @@ class TermsAndConditionSerializer(serializers.ModelSerializer):
         model = TermsAndCondition
         fields = ('id', 'title', 'desc')    
         
+class EnrollRequestSerializer(serializers.ModelSerializer):
+    pass
+
+
+class EmployeeRegistrationSerializer(serializers.Serializer):
+    firstName = serializers.CharField(max_length=100)
+    lastName = serializers.CharField(max_length=100)
+    homeAddress = serializers.CharField(max_length=100)
+    emailAddress = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+    phone = serializers.CharField(max_length=10)
+    username = serializers.CharField()
+    gender = serializers.ChoiceField(choices=[(choice[0], choice[0]) for choice in GENDER_CHOICES])
+    verified = serializers.BooleanField()
+
+    def create(self, validated_data):
+        # This will not actually be used for creating objects directly,
+        # as we'll handle that in our view.
+        pass
+
+    def update(self, instance, validated_data):
+        # This serializer will be used only for registration (i.e., creation),
+        # so we won't implement updating here.
+        pass
+    
+    class Meta:
+        model = Employee
+        fields = ('id', 'firstName', 'lastName', 'homeAddress', 'emailAddress', 'password', 'phone', 'username', 'gender', 'verified')

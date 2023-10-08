@@ -1,12 +1,13 @@
 "use client";
-
+// import useSWR from 'swr'
 import React, { useState } from 'react'
 import profile from '@/content/profile'
 import { Button, Mail, ProgProfile } from '@/components'
 import Image from 'next/image'
 
+// const fetcher = (...args) => fetch(...args).then((res) => res.json())
 const pp = () => {
-
+    // const { profile, error } = useSWR('http://127.0.0.1:8000/', fetcher)
     const [popup, setPopup] = useState(false)
     const [popupMail, setPopupMail] = useState(false)
 

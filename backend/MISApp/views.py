@@ -1,36 +1,70 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from rest_framework import generics
+from django.db import transaction
+from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
 
 class HomePageAPIView(generics.ListAPIView):
-    
     serializer_class = EmployeeSerializer
-    
     def list(self, request, *args, **kwargs):
         architect_users = Employee.objects.filter(user_status='A')
         programmer_users = Employee.objects.filter(user_status='P')
-
         architect_serializer = self.get_serializer(architect_users, many=True)
         programmer_serializer = self.get_serializer(programmer_users, many=True)
-
         return Response({
             'programmers': programmer_serializer.data,
             'architects': architect_serializer.data
         })
         
 class ApplicationAPIView(generics.ListAPIView):
-    
     serializer_class = ApplicationSerializer
-    
     def list(self, request, *args, **kwargs):
         return Response(Employee.objects.filter(user_status='W'))
 
 class TermsAndConditionListView(generics.ListAPIView):
-    queryset = TermsAndCondition.objects.all()
     serializer_class = TermsAndConditionSerializer
+    def list(self, request, *args, **kwargs):
+        return Response(TermsAndCondition.objects.all())
 
+class ProgrammerRegistrationView(generics.CreateAPIView):
+    serializer_class = EmployeeRegistrationSerializer
+    permission_classes = []
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Extract user-related data from serializer
+        user_data = {
+            'username': serializer.validated_data['username'],
+            'password': serializer.validated_data['password'],
+            'email': serializer.validated_data['emailAddress']
+        }
+
+        employee_data = {
+            'first_name': serializer.validated_data['firstName'],
+            'last_name': serializer.validated_data['lastName'],
+            'home_address': serializer.validated_data['homeAddress'],
+            'phone_number': serializer.validated_data['phone'],
+            'gender': serializer.validated_data['gender'],
+            'is_verified': serializer.validated_data['verified']
+        }
+
+        with transaction.atomic():
+            # Create User object and set password
+            user = User(username=user_data['username'], email=user_data['email'])
+            user.set_password(user_data['password'])
+            user.save()
+
+            # Create Employee object and associate with User
+            Employee.objects.create(user=user, **employee_data)
+
+            # Send Verification Email
+            send_email_after_registration(user_data['email'], str(uuid.uuid4()))
+            
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 from django.http import HttpResponse
 from django.contrib import messages

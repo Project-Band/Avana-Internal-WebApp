@@ -2,11 +2,36 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import homecontent from '@/content/homeContent'
+// import homecontent from '@/content/homeContent'
 import {Button, Login, Register} from '@/components'
-
+// import useSWR from 'swr'
+// const fetcher = (...args) => fetch(...args).then((res) => res.json())
 const Homepage = () => {
 
+
+  const [homecontent, setHomecontent] = useState([]);
+
+  useEffect(() => {
+    // Fetch data from the API here
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/');
+        
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setHomecontent(data); // Update state with fetched data
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData(); // Call the fetch function when the component mounts
+  }, []);
+  console.log(homecontent);
+
+  // const { homecontent, error } = useSWR('http://127.0.0.1:8000/', fetcher)
   const [popupReg, setPopupReg] = useState(false);
   const [popupLog, setPopupLog] = useState(false);
 
@@ -49,19 +74,34 @@ const Homepage = () => {
 
   }, []);
 
-  const programmers = homecontent.programmers.map(items => (
-    <div className='flex flex-col items-center gap-4'>
-      <div className='relative w-24 h-24'><Image src={`/images/home/${items.img}`} fill={true} objectFit='cover' className='border-2 object-top overflow-hidden rounded-full border-secondary object-cover'/></div>
-      <p>{items.name}</p>
-    </div>
-  ))
+  // const programmers = homecontent.programmers.map(items => (
+  //   <div className='flex flex-col items-center gap-4'>
+  //     <div className='relative w-24 h-24'><Image src={`/images/home/${items.img}`} fill={true} objectFit='cover' className='border-2 object-top overflow-hidden rounded-full border-secondary object-cover'/></div>
+  //     <p>{items.name}</p>
+  //   </div>
+  // ))
     
-  const architects = homecontent.architects.map(items =>(
+  // const architects = homecontent.architects.map(items =>(
+  //   <div className='flex flex-col items-center gap-4'>
+  //     <div className='relative w-24 h-24'><Image src={`/images/home/${items.img}`} fill={true} objectFit='cover' className='border-2 object-top overflow-hidden rounded-full border-secondary object-cover'/></div>
+  //     <p>{items.name}</p>
+  //   </div>
+  // ))
+  const programmers = homecontent.programmers ?
+  homecontent.programmers.map(items => (
     <div className='flex flex-col items-center gap-4'>
       <div className='relative w-24 h-24'><Image src={`/images/home/${items.img}`} fill={true} objectFit='cover' className='border-2 object-top overflow-hidden rounded-full border-secondary object-cover'/></div>
       <p>{items.name}</p>
     </div>
-  ))
+  )): null
+    
+  const architects = homecontent.architects? 
+  homecontent.architects.map(items =>(
+    <div className='flex flex-col items-center gap-4'>
+      <div className='relative w-24 h-24'><Image src={`/images/home/${items.img}`} fill={true} objectFit='cover' className='border-2 object-top overflow-hidden rounded-full border-secondary object-cover'/></div>
+      <p>{items.name}</p>
+    </div>
+  )):null
 
   return (
     <div className='h-screen w-screen'>
