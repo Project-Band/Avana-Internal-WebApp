@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from .models import Employee, TermsAndCondition, GENDER_CHOICES
+from .models import Employee, TermsAndCondition, GENDER_CHOICES, Project
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
@@ -72,3 +72,15 @@ class EmployeeRegistrationSerializer(serializers.Serializer):
     class Meta:
         model = Employee
         fields = ('id', 'firstName', 'lastName', 'homeAddress', 'emailAddress', 'password', 'phone', 'username', 'gender', 'verified')
+
+class ProjectSerializer(serializers.ModelSerializer):
+    enrolled_employees = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = ('id', 'project_name', 'project_description', 'project_start_date', 'project_end_date', 'project_status', 'enrolled_employees')
+
+    def get_enrolled_employees(self, obj):
+        # Filtering only the approved employees for a given project
+        employees = Employee.objects.filter(projectenroll__Project=obj, projectenroll__enrollmentStatus='A')
+        return EmployeeSerializer(employees, many=True).data
