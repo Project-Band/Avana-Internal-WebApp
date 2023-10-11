@@ -46,7 +46,7 @@
   }
 
   .buttons{
-    @apply flex shadow-md border h-max gap-2 py-3 px-4 rounded-full items-center cursor-pointer hover:scale-105
+    @apply flex select-none justify-center text-center shadow-md border h-max gap-2 py-3 px-4 rounded-full items-center cursor-pointer hover:scale-105
   }
 
   .formLabel{
@@ -54,7 +54,7 @@
   }
 
   .formInput{
-    @apply py-1 bg-white50 border-b-2 w-full focus:outline-none appearance-none
+    @apply py-1 bg-white50 border-b-2 border-grey50 w-full focus:outline-none appearance-none
   }
 
   .adminContent{

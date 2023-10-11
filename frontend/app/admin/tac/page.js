@@ -1,10 +1,28 @@
 "use client";
 
 import { Button } from '@/components'
-import React, {useState} from 'react'
-import tacContent from '@/content/tac';
+import React, {useState, useEffect} from 'react'
 
 const tac = () => {
+    const [tacContent, setTacContent] = useState([]);
+
+  useEffect(() => {
+    // Fetch data from the API here
+    const fetchData = async () => {
+      try {
+        const response = await fetch('localhost:8000/tacContent');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setTacContent(data); // Update state with fetched data
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData(); // Call the fetch function when the component mounts
+  }, []);
 
     const [editableText, setEditableText] = useState();
 
@@ -12,7 +30,7 @@ const tac = () => {
         setEditableText(event.target.value);
     };
 
-    const tacList = tacContent.map(items => (
+    const tacList = tacContent? tacContent.map(items => (
         <div className='flex flex-col gap-2'>
             <h4>{items.title}</h4>
             <textarea
@@ -23,7 +41,7 @@ const tac = () => {
                 cols={80} 
             />
         </div>
-    ))
+    )):null
 
   return (
     <div className='adminContent flex flex-col gap-6'>

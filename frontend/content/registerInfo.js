@@ -5,9 +5,11 @@ const registerInfo =[
         lastName:"Guy",
         homeAddress:"Gongabu",
         emailAddress:"nothalfguy@gmail.com",
+        password:"hello123",
         phone:'9800000000',
         username:"halfguy",
-        gender:"Male"
+        gender:"Male",
+        verified:"true"
     }
 ]
 

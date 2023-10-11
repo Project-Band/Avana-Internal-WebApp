@@ -1,7 +1,7 @@
-// /** @type {import('next').NextConfig} */
-// const nextConfig = {
-//     output: "export"
-// }
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    // assetPrefix: "/Avana/",
+    // output: "export"
+}
 
-// module.exports = nextConfig
-module.exports = {  }
+module.exports = nextConfig

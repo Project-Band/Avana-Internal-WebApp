@@ -1,12 +1,33 @@
+"use client"
+
 import { Close } from '@mui/icons-material';
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import {Button} from '@/components'
-import profile from '@/content/profile';
 import Image from 'next/image';
 
 const EnrollProgrammers = ({isVisible, onClose}) => {
 
-    const profileList = profile.map(items => (
+    const [profile, setProfile] = useState([]);
+
+  useEffect(() => {
+    // Fetch data from the API here
+    const fetchData = async () => {
+      try {
+        const response = await fetch('localhost:8000/profile');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setProfile(data); // Update state with fetched data
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData(); // Call the fetch function when the component mounts
+  }, []);
+
+    const profileList = profile? profile.map(items => (
         <div className="w-full p-3 bg-white0 border-grey50 border-b justify-start items-center gap-6 inline-flex hover:shadow-sm hover:bg-white50">
         <p className="text-sm">{items.id}</p>
         <div className="grow shrink basis-0 justify-between items-center flex">
@@ -20,9 +41,9 @@ const EnrollProgrammers = ({isVisible, onClose}) => {
             <Button label="Remove" type='decline'/>
         </div>
         </div>
-      ))
+      )):null
 
-      const availableProfileList = profile.map(items => (
+      const availableProfileList = profile? profile.map(items => (
         <div className="w-full p-3 border-b bg-white0 border-grey50 justify-start items-center gap-6 inline-flex hover:shadow-sm hover:bg-white50">
         <p className="text-sm">{items.id}</p>
         <div className="grow shrink basis-0 justify-between items-center flex">
@@ -36,7 +57,7 @@ const EnrollProgrammers = ({isVisible, onClose}) => {
             <Button label="Enroll" type='accept'/>
         </div>
         </div>
-      ))
+      )):null
 
     if(!isVisible) return null;
 

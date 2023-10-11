@@ -15,7 +15,7 @@ const AdminNavbar = () => {
   return (
     <div className='flex flex-col bg-white50 shadow-lg w-[25%] h-max pt-6 rounded-sm overflow-hidden gap-10'>
         <div className='flex flex-col gap-4 items-center'>
-            <Image src="../demo.png" width={80} height={80} layout="fixed" className='border-2 h-[80px] object-cover object-top overflow-hidden rounded-full border-secondary'/>
+            <Image src="/demo.png" width={80} height={80} layout="fixed" className='border-2 h-[80px] object-cover object-top overflow-hidden rounded-full border-secondary'/>
             <div className='flex flex-col items-center text-center'>
                 <h3 className='text-primary'>Half Guy</h3>
                 <p>Admin</p>

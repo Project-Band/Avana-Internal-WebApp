@@ -9,6 +9,8 @@ import ProgProfile from "./ProgProfile";
 import Mail from "./Mail";
 import EnrollProgrammers from "./EnrollProgrammers";
 import NewApplications from "./NewApplications";
+import ToC from "./ToC";
+import { withAuth } from "./withAuth";
 
 export{
     Homepage,
@@ -21,5 +23,7 @@ export{
     ProgProfile,
     Mail,
     EnrollProgrammers,
-    NewApplications
+    NewApplications,
+    ToC,
+    withAuth
 }

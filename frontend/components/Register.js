@@ -3,19 +3,21 @@
 import { Close } from '@mui/icons-material'
 import React, { Fragment, useState } from 'react'
 import Link from 'next/link';
-import registerInfo from '@/content/registerInfo';
+import Button from './Button';
 
 const Register = ({isVisible, onClose}) => {
 
     const [popup, setPopup] = useState("none")
+    const [selectedImage, setSelectedImage] = useState("");
+    const [passwordMatchError, setPasswordMatchError] = useState(false);
 
     const [form, setForm] = useState({
         firstName: '',
         lastName: '',
         homeAddress: '',
         emailAddress: '',
-        password:'',
-        confPassword:'',
+        pass:'',
+        confPass:'',
         phone: '',
         username: '',
         gender: ''
@@ -26,16 +28,63 @@ const Register = ({isVisible, onClose}) => {
             ...form,
             [e.target.name] : e.target.value
         }))
-        if (form.username=="halfguy") {
-            setPopup("username")
-        }
-        if(form.emailAddress=="nothalfguy@gmail.com"){
-            setPopup("emailAddress")
-        }
-        if(form.emailAddress=="nothalfguy@gmail.com" && form.username=="halfguy"){
-            setPopup("userAddress")
-        }
+        if (e.target.name === 'confPass') {
+            setPasswordMatchError(form.pass !== e.target.value);
+          }
     }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+            const checkResponse = await fetch('localhost:8000/registerinfo', {
+              method: 'GET', // Use GET to retrieve data without modifying it
+            });
+        
+            if (checkResponse.ok) {
+              const existingData = await checkResponse.json();
+              const isUsernameExists = existingData.some(item => item.username === form.username);
+              const isEmailExists = existingData.some(item => item.email === form.email);
+        
+              if (isUsernameExists) {
+                window.alert('Username already exists. Please choose a different one.');
+                return;
+              }
+        
+              if (isEmailExists) {
+                window.alert('Email already exists. Please use a different email.');
+                return;
+              }
+            } else {
+              window.alert('Failed to check existing data. Please try again later.');
+              return;
+            }
+          } catch (error) {
+            window.alert('Error checking data. Please check your internet connection.');
+            return;
+          }
+    
+        try {
+          const response = await fetch('localhost:8000/registerinfo', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(form),
+          })
+         
+          if (response.ok) {
+            // Successful registration
+            window.alert('You have successfully registered. Check your email.');
+          } else {
+              window.alert('Registration failed. Please try again later.');
+            }
+        } catch (error) {
+          // Handle network-related errors
+          console.error('Error registering:', error);
+          window.alert('Error registering. Please check your internet connection.');
+        }
+      };
 
     if(!isVisible) return null;
 
@@ -50,7 +99,7 @@ const Register = ({isVisible, onClose}) => {
                 <h3 className='text-primary'> Register </h3>
                 <div onClick={() => onClose()}><Close className='text-3xl rounded-sm hover:scale-105 border bg-red cursor-pointer text-white50'/></div>
             </div>
-            <form className='flex flex-col gap-8 pr-4 overflow-y-scroll'>
+            <form className='flex flex-col gap-8 pr-4 overflow-y-scroll' onSubmit={handleSubmit}>
                 <div className='flex gap-6'>
                     <div className='w-full'>
                         <label
@@ -79,7 +128,7 @@ const Register = ({isVisible, onClose}) => {
                         <input
                             type='text'
                             id='lastName'
-                            name='lasName'
+                            name='lastName'
                             onChange={handleChange}
                             placeholder='Enter your Last Name'
                             className='formInput'
@@ -131,7 +180,7 @@ const Register = ({isVisible, onClose}) => {
                     <input
                         type='password'
                         id='password'
-                        name='password'
+                        name='pass'
                         onChange={handleChange}
                         placeholder='Enter your password'
                         className='formInput'
@@ -148,12 +197,15 @@ const Register = ({isVisible, onClose}) => {
                     <input
                         type='password'
                         id='confPassword'
-                        name='confPassword'
+                        name='confPass'
                         onChange={handleChange}
                         placeholder='Confirm your password'
                         className='formInput'
                         required
                     />
+                    {passwordMatchError && (
+                        <p className="text-sm text-red">Passwords do not match.</p>
+                    )}
                 </div>
                 <div className='flex gap-6'>
                     <div className='flex w-full flex-col gap-8'>
@@ -206,32 +258,33 @@ const Register = ({isVisible, onClose}) => {
                             
                         </div>
                     </div>
-                    <div className='flex flex-col w-full items-center justify-center gap-2'>
-                        <input type='file' file className='appearance-none rounded-full border-2 border-secondary top-1/2 bg-white100 w-[150px] h-[150px] file:bg-white100 file:w-full file:h-full file:cursor-pointer  file:m-0 file:mt-1 file:text-black150 file:px-3 file:border-none'/>
-                        <h4 className='text-primary text-center'>Profile Image</h4>
-                    </div>
+                    <label className="w-full h-max mx-24 mt-8 space-y-4">
+                        <input
+                        type="file"
+                        hidden
+                        onChange={({ target }) => {
+                            if (target.files) {
+                            const file = target.files[0];
+                            setSelectedImage(URL.createObjectURL(file));
+                                }
+                        }}
+                        />
+                        <div className="w-full h-[100px] aspect-video rounded flex items-center justify-center border-2 border-dashed cursor-pointer">
+                        {selectedImage ? (
+                            <img src={selectedImage} alt="" className='h-[100px] object-cover'/>
+                        ) : (
+                            <span>Select Image</span>
+                        )}
+                        </div>
+                        <Button type="add" label="Upload Image" />
+                    </label>
                 </div>
-                <Link href="/logged"><input
+                <input
                     type='submit'
                     value="Register"
                     className='w-full flex h-max border text-white50 justify-center border-secondary gap-2 bg-primary py-2 px-4 rounded-full items-center cursor-pointer'
-                /></Link>
+                />
             </form>
-            <div className={`${popup=="username"? 'fixed': 'hidden'} absolute flex self-center w-full h-max bottom-0 items-center justify-center`}>
-                <div className='flex text-center w-full flex-col p-3 bg-white50 rounded-sm gap-8 shadow-lg'>
-                    <p className='text-red'>The Username already exists</p>
-                </div>
-            </div>
-            <div className={`${popup=="emailAddress"? 'fixed': 'hidden'} absolute flex self-center w-full h-max bottom-0 items-center justify-center`}>
-                <div className='flex text-center w-full flex-col p-3 bg-white50 rounded-sm gap-8 shadow-lg'>
-                    <p className='text-red'>The Email already exists</p>
-                </div>
-            </div>
-            <div className={`${popup=="userAddress"? 'fixed': 'hidden'} absolute flex self-center w-full h-max bottom-0 items-center justify-center`}>
-                <div className='flex text-center w-full flex-col p-3 bg-white50 rounded-sm gap-8 shadow-lg'>
-                    <p className='text-red'>The Email and Username already exists</p>
-                </div>
-            </div>
         </div>
     </div>
   )

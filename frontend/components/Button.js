@@ -29,6 +29,14 @@ const Button = (props) => {
                 </div>
             )
 
+        case "loginDis":
+            return(
+                <div className='buttons px-8 border-grey50 bg-grey50'>
+                    <Login className="text-lg text-white50" />
+                    <p className='text-white50'>Login</p>
+                </div>
+            )
+
         case "primary":
             return(
                 <div className='buttons border-secondary bg-primary'>

@@ -1,12 +1,33 @@
+"use client"
+
 import { Close } from '@mui/icons-material';
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
 import {Button, Topbar } from '@/components'
-import registerInfo from '@/content/registerInfo';
 
 const NewApplications = ({isVisible, onClose}) => {
 
-    const applicationList = registerInfo.map(items =>(
+    const [registerInfo, setRegisterInfo] = useState([]);
+
+//   useEffect(() => {
+//     // Fetch data from the API here
+//     const fetchData = async () => {
+//       try {
+//         const response = await fetch('localhost:8000/registerinfo/');
+//         if (!response.ok) {
+//           throw new Error('Network response was not ok');
+//         }
+//         const data = await response.json();
+//         setRegisterInfo(data); // Update state with fetched data
+//       } catch (error) {
+//         console.error('Error fetching data:', error);
+//       }
+//     };
+
+//     fetchData(); // Call the fetch function when the component mounts
+//   }, []);
+
+    const applicationList = registerInfo? registerInfo.map(items =>(
         <div className='flex gap-10 w-full'>
             <div className='flex flex-col gap-6 w-full'>
                 <div className='flex gap-2 w-full items-center'>
@@ -37,7 +58,7 @@ const NewApplications = ({isVisible, onClose}) => {
                 </div>
             </div>
         </div>
-    ))
+    )):null
 
     if(!isVisible) return null;
 

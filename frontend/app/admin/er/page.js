@@ -1,10 +1,31 @@
-import React from 'react'
-import enrollReqs from '@/content/enrollReqs'
+"use client"
+
+import React, {useState, useEffect} from 'react'
 import { Button } from '@/components'
 
 const er = () => {
 
-  const requestList = enrollReqs.map(items => (
+  const [enrollReqs, setEnrollReqs] = useState([]);
+
+  useEffect(() => {
+    // Fetch data from the API here
+    const fetchData = async () => {
+      try {
+        const response = await fetch('localhost:8000/enrollReqs');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setEnrollReqs(data); // Update state with fetched data
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData(); // Call the fetch function when the component mounts
+  }, []);
+
+  const requestList = enrollReqs? enrollReqs.map(items => (
     <div className="cursor-pointer w-full px-8 py-4 border bg-white0 border-grey50 rounded-sm justify-start items-center gap-6 inline-flex hover:bg-white50">
     <p className="text-sm">{items.id}</p>
     <div className="grow shrink basis-0 justify-between items-center flex">
@@ -18,7 +39,7 @@ const er = () => {
         </div>
     </div>
     </div>
-  ))
+  )):null
 
   return (
     <div className='adminContent flex flex-col gap-6'>

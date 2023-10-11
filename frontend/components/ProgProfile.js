@@ -1,13 +1,34 @@
+"use client"
+
 import { Close } from '@mui/icons-material';
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import Image from 'next/image';
 import {Button, Topbar } from '@/components'
-import projects from '@/content/projects';
 
 const ProgProfile = ({isVisible, onClose}) => {
 
+    const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    // Fetch data from the API here
+    const fetchData = async () => {
+      try {
+        const response = await fetch('localhost:8000/projects');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setProjects(data); // Update state with fetched data
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData(); // Call the fetch function when the component mounts
+  }, []);
+
     
-    const enrolledProjects = projects.map(items => (
+    const enrolledProjects = projects? projects.map(items => (
         <div className="w-full px-8 py-4 border-t border-b border-zinc-400 justify-start items-center gap-6 inline-flex hover:shadow-sm hover:scale-[1.01] hover:bg-white100">
             <p className="text-sm">{items.id}</p>
             <div className="grow shrink basis-0 justify-between items-center flex">
@@ -18,7 +39,7 @@ const ProgProfile = ({isVisible, onClose}) => {
                 <Button label="Learn more" type= "text" />
             </div>
         </div>
-    ))
+    )):null
 
     if(!isVisible) return null;
 
