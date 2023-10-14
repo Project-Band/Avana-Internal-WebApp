@@ -1,14 +1,19 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import  get_object_or_404
 from django.contrib.auth import authenticate, login
 from django.db import transaction
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.core.mail import send_mail
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from .models import *
 from .serializers import *
+import uuid
 
+    
 class HomePageAPIView(generics.ListAPIView):
     serializer_class = EmployeeSerializer
     def list(self, request, *args, **kwargs):
@@ -55,7 +60,7 @@ class ProgrammerRegistrationView(generics.CreateAPIView):
             'home_address': serializer.validated_data['homeAddress'],
             'phone_number': serializer.validated_data['phone'],
             'gender': serializer.validated_data['gender'],
-            'is_verified': serializer.validated_data['verified']
+            # 'is_verified': serializer.validated_data['verified']
         }
 
         with transaction.atomic():
@@ -77,23 +82,28 @@ class ProgrammerRegistrationView(generics.CreateAPIView):
 def login_view(request):
     username = request.data.get("username")
     password = request.data.get("password")
+    # print(username, password)
     user = authenticate(username=username, password=password)
+    print(user)
     if user:
         login(request, user)
-        return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
+        employee = get_object_or_404(Employee, user=user)
+        if employee.user_status == 'X': 
+            return Response({"title": "Admin"}, status=status.HTTP_302_FOUND)
+        return Response({"title": "User"}, status=status.HTTP_200_OK)
     else:
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-
 
 @api_view(['GET'])
 # @permission_classes([IsAuthenticated])
 def user_projects_view(request, username):
     user = get_object_or_404(User, username=username)
     employee = get_object_or_404(Employee, user=user)
-
+    print(username)
      # Check if the user is an admin
     if employee.user_status == 'X':  # 'X' for Admin
         # Indicate a redirect to the client
+        print('Admin')
         return Response({"redirect": f"/useradmin/{username}"}, status=status.HTTP_302_FOUND)
     
     # Check if the user has an appropriate status
@@ -102,23 +112,63 @@ def user_projects_view(request, username):
 
     # Projects the user is enrolled in (with approved status)
     enrolled_projects = Project.objects.filter(employees=employee, projectenroll__enrollmentStatus='A')
+    # Projects the user is enrolled in (with approved status)
+    requested_projects = Project.objects.filter(employees=employee, projectenroll__enrollmentStatus = 'R')
     
     # Projects the user is NOT enrolled in
     not_enrolled_projects = Project.objects.exclude(employees=employee)
     
     return Response({
-        "user": {
-            "username": user.username,
-            "first_name": employee.first_name,
-            "last_name": employee.last_name,
-            "email": employee.user.email,
-            # add others according to react
-            'others': "whatever frontend demands",
-        },
+        "username": user.username,
+        "firstName": employee.first_name,
+        "lastName": employee.last_name,
+        "email": employee.user.email,
+        "title": employee.user_status,
+        "homeAddress": employee.home_address,
+        "phone": employee.phone_number,
+        
         "enrolled_projects": ProjectSerializer(enrolled_projects, many=True).data,
+        "requested_projects": ProjectSerializer(requested_projects, many=True).data,
         "not_enrolled_projects": ProjectSerializer(not_enrolled_projects, many=True).data,
     })
 
+
+@csrf_exempt
+@api_view(['POST'])
+def test_enroll_request_view(request):
+    username = request.data.get("username")
+    project_name = request.data.get("project_name")
+    print(username, project_name)
+    if not username or not project_name:
+        return Response({"error": "Both username and project name are required."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    with transaction.atomic():
+        try:
+            # Get User and related Employee
+            user = User.objects.get(username=username)
+            employee = Employee.objects.get(user=user)
+
+            # Get Project
+            project = Project.objects.get(project_name=project_name)
+
+            # Check if enrollment request already exists
+            existing_request = ProjectEnroll.objects.filter(Employee=employee, Project=project).first()
+            if existing_request:
+                return Response({"error": "An enrollment request already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create a new enrollment request with "Requested" status
+            ProjectEnroll.objects.create(Employee=employee, Project=project, enrollmentStatus='R')
+        
+        except User.DoesNotExist:
+            return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        except Employee.DoesNotExist:
+            return Response({"error": "Employee does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        except Project.DoesNotExist:
+            return Response({"error": "Project does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return Response({"message": "Enrollment request created successfully."}, status=status.HTTP_200_OK)
 
 class AdminPageView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -159,7 +209,35 @@ class AdminPageView(APIView):
             'projects': projects_data,
             'pendingenrollment': pending_data,
         })
-         
+
+
+class RequestEnrollView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        serializer = EnrollRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            project_name = serializer.validated_data['project_name']
+            with transaction.atomic():
+                try:
+                    user = User.objects.get(username=username)
+                    employee = Employee.objects.get(user=user)
+                    project = Project.objects.get(project_name=project_name)
+                    existing_request = ProjectEnroll.objects.filter(Employee=employee, Project=project).first()
+                    if existing_request:
+                        return Response({"error": "An enrollment request already exists."}, status=status.HTTP_400_BAD_REQUEST)
+                    ProjectEnroll.objects.create(Employee=employee, Project=project, enrollmentStatus='R')
+                except User.DoesNotExist:
+                    return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
+                except Employee.DoesNotExist:
+                    return Response({"error": "Employee does not exist."}, status=status.HTTP_404_NOT_FOUND)
+                except Project.DoesNotExist:
+                    return Response({"error": "Project does not exist."}, status=status.HTTP_404_NOT_FOUND)
+                except Exception as e:
+                    return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"message": "Enrollment request created successfully."}, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
 # Helper Methods
 
 def send_email_after_registration(email, token):
@@ -183,140 +261,6 @@ def verify(request, auth_token):
     except Exception as e:
             print(e)
             return HttpResponse("An error occurred during verification. Please try again.")   
-    
-from django.http import HttpResponse
-from django.contrib import messages
-from django.contrib.auth.models import User
-
-import uuid
-from django.conf import settings
-from django.core.mail import send_mail, send_mass_mail
-from django.contrib.auth import authenticate
-from django.contrib.auth.decorators import login_required
-# Create your views here.
-
-
-def display_homepage(request):
-    architect_users = Employee.objects.filter(user_status='A')
-    programmer_users = Employee.objects.filter(user_status='P')
-    
-    context = {
-        'architect_users': architect_users,
-        'programmer_users': programmer_users,
-    }
-    return render(request, 'homepage.html', context=context)
-
-def programmer_signup(request):
-    context = {}
-    
-    if request.method == 'POST':
-        # Get form data
-        
-        # Get User information
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        personal_email = request.POST.get('personal_email_address')
-        
-        # Get personal information
-        first_name = request.POST.get('first_name')
-        middle_name = request.POST.get('middle_name')
-        last_name = request.POST.get('last_name')
-        home_address = request.POST.get('home_address')
-        phone_number = request.POST.get('phone_number')
-        gender = request.POST.get('gender')
-        profile_image = request.FILES.get('profile_image')
-        try:
-            # check if user/email is already registered
-            if User.objects.filter(username=username).first():
-                messages.success(request, 'Username is already in use')
-                return redirect('/register')
-            
-            if User.objects.filter(email=personal_email).first():
-                messages.success(request, 'Email is already in use')
-                return redirect('/register')
-            # Create user instance
-            user = User.objects.create(username=username, email=personal_email)
-            user.set_password(password)
-            # Save user instance to the database
-            user.save()
-            auth_token = str(uuid.uuid4())
-            profile = Employee.objects.create(
-                user = user,
-                auth_token = auth_token,
-                
-                first_name=first_name,
-                middle_name=middle_name,
-                last_name=last_name,
-                home_address=home_address,
-                phone_number=phone_number,
-                gender=gender,
-                profile_image=profile_image
-            )
-            profile.save()
-            send_email_after_registration(personal_email, auth_token)
-            return redirect('/email_validate')
-        except Exception as e:
-            print(e)
-        
-        # Redirect to a success page or perform other actions
-    return render(request, 'programmer_signup.html', context=context)
-
-def programmer_login(request):
-    context = {}
-    
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = User.objects.filter(username=username).first()
-        if user is None:
-            messages.success(request, 'User not found')
-            return redirect('/login')
-        employee_obj = Employee.objects.filter(user = user).first()
-        if employee_obj is None:
-            messages.success(request, 'Employee not found')
-            return redirect('/login')
-        if not employee_obj.is_verified:
-            messages.success(request, 'Email is not verified. Check your email(and Spam).')
-            return redirect('/login')
-        print(employee_obj.user_status)
-        if employee_obj.user_status == 'W':
-            messages.success(request, 'User is not approved by admin yet')
-            return redirect('/login')
-        
-        
-        auth_user = authenticate(username = username, password = password)
-        if auth_user:
-            return redirect('user_profile', user_id=employee_obj.user.id)
-            # messages.success(request, 'User is not approved by admin yet')
-            # return redirect('/login')
-    return render(request, 'programmer_login.html', context=context)
-
-def register_success(request):
-    context = {}
-    
-    if request.method == 'POST':
-        user_name = request.POST.get('user')
-    return render(request, 'register_success.html', context=context)
-
-def email_validation(request):
-    context = {}
-    return render(request, 'email_validation.html', context=context)
-
-
-def error_page(request):
-    return render(request, 'error.html')
-
-@login_required
-def user_profile(request, user_id):
-    logged_in_user_id = request.user.id
-    employee = get_object_or_404(Employee, user_id=user_id)
-    
-    # if logged_in_user_id != user_id:
-    #     return HttpResponse("You don't have permission to access this page.")
-    
-    context = {'employee': employee}
-    return render(request, 'user_profile.html', context=context)
-
 
 # views.py
 from rest_framework import viewsets

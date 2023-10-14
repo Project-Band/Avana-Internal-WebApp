@@ -32,6 +32,8 @@ urlpatterns = [
     path('<str:username>/', views.user_projects_view, name='user_projects'),
     # admin page
     path('useradmin/<str:username>/', views.AdminPageView.as_view(), name='admin_page'),
+    # request emroll
+    path('enroll_requests', views.test_enroll_request_view, name='request_enroll'),
     
 ]
 
