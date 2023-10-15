@@ -14,43 +14,37 @@ router.register(r'employees', EmployeeViewSet)
 
 
 urlpatterns = [
-    # Homepage
-    path('', views.HomePageAPIView.as_view(), name = 'HomePage'),
-    # Applications
-    path('application/', views.ApplicationAPIView.as_view(), name = 'applications'),
-    # Terms and Conditions
-    path('terms-and-conditions/', TermsAndConditionListView.as_view(), name='terms_and_conditions_list'),
     # Register
-     path('registerinfo/', ProgrammerRegistrationView.as_view(), name='programmer_registration'),
-    # api
-    path('api/', include(router.urls)),
-    # verify
-    path ('verify/<auth_token>', views.verify, name = 'verify'),
+    path('registerinfo/', ProgrammerRegistrationView.as_view(), name='programmer_registration'),
     # login,
     path('login/', views.login_view, name='login'),
+    # verify
+    path ('verify/<auth_token>', views.verify, name = 'verify'),
+    
     # user page
     path('<str:username>/', views.user_projects_view, name='user_projects'),
-    # admin page
-    path('useradmin/<str:username>/', views.AdminPageView.as_view(), name='admin_page'),
+    # Homepage
+    path('', views.HomePageAPIView.as_view(), name = 'employee_info'),
     # request emroll
     path('enroll_requests', views.test_enroll_request_view, name='request_enroll'),
     
-]
+    
+    # Applications
+    # path('application', views.ApplicationAPIView.as_view(), name = 'applications'),
+    path('application', views.get_applications, name = 'applications'),
+    #accept
+    path('accept_application', views.accept_application, name = 'accept_application'),
+    # reject
+    path('reject_application', views.reject_application, name = 'reject_application'),
+    
+    # Terms and Conditions
+    path('termsandconditions', views.get_terms_and_conditions, name='terms_and_conditions_list'),
 
-# urlpatterns = [
-#     # Homepage
-#     path('', views.HomePageAPIView.as_view(), name = 'HomePage'),
-#     # 
-#     # path('', views.display_homepage, name = 'homepage'),
-#     path('register/', views.programmer_signup, name='register'),
-#     path('login/', views.programmer_login, name='login'),
-#     path('email_validate/', views.email_validation, name='email_validate'),
-#     path('register_success/', views.register_success, name='register_success'),
     
-#     
-#     path('error/', views.error_page, name = 'error'),
     
-#     path('user/<int:user_id>/', views.user_profile, name='user_profile'),
     
-#     
-# ]
+    # admin page
+    path('useradmin/<str:username>/', views.AdminPageView.as_view(), name='admin_page'),
+    
+    
+]

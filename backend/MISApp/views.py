@@ -25,16 +25,60 @@ class HomePageAPIView(generics.ListAPIView):
             'programmers': programmer_serializer.data,
             'architects': architect_serializer.data
         })
-        
-class ApplicationAPIView(generics.ListAPIView):
-    serializer_class = ApplicationSerializer
-    def list(self, request, *args, **kwargs):
-        return Response(Employee.objects.filter(user_status='W'))
 
-class TermsAndConditionListView(generics.ListAPIView):
-    serializer_class = TermsAndConditionSerializer
-    def list(self, request, *args, **kwargs):
-        return Response(TermsAndCondition.objects.all())
+@api_view(['GET'])
+def get_applications(request):
+    if request.method == 'GET':
+        new_applicants = Employee.objects.filter(is_verified=True, user_status='W')
+        new_applicants_data = [
+            {
+                "first_name": applicant.first_name,
+                "middle_name": applicant.middle_name if applicant.middle_name else '',  
+                "last_name": applicant.last_name, 
+                "email": applicant.user.email, 
+                "username": applicant.user.username,
+                "phone": applicant.phone_number,
+                "home_address":applicant.home_address,
+                "gender": applicant.gender
+            } 
+            for applicant in new_applicants
+        ]
+        return Response(new_applicants_data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def accept_application(request):
+    try:
+        username = request.data.get("username")
+        user = get_object_or_404(User, username=username)
+        employee = get_object_or_404(Employee, user=user)
+        mail = user.email
+        employee.user_status = 'P'
+        employee.save()
+        send_email_after_registration(mail, mailtype='AfterAccept')
+        return Response({"message": "User updated successfully"}, status=status.HTTP_200_OK)
+    except User.DoesNotExist or Employee.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['POST'])
+def reject_application(request):
+    try:
+        username = request.data.get("username")
+        user = get_object_or_404(User, username=username)
+        mail = user.email
+        # Delete user
+        user.delete()
+        send_email_after_registration(mail, mailtype='AfterReject')
+        return Response({"message": "User deleted successfully"}, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def get_terms_and_conditions(request):
+     if request.method == 'GET':
+        terms_conditions = TermsAndCondition.objects.all()
+        serialized_terms = TermsAndConditionsSerializer(terms_conditions, many=True)
+        return Response(serialized_terms.data, status=status.HTTP_200_OK)
+       
 
 class ProgrammerRegistrationView(generics.CreateAPIView):
     serializer_class = EmployeeRegistrationSerializer
@@ -240,9 +284,13 @@ class RequestEnrollView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
 # Helper Methods
 
-def send_email_after_registration(email, token):
+def send_email_after_registration(email, token = None, mailtype = 'AfterRegistration'):
     subject = 'Verify your account'
     message = f'Use this link to verify your account  http://127.0.0.1:8000/verify/{token}. T&C will also be sent here.'
+    if mailtype == 'AfterAccept':
+        message = f'Your application has been accepted.'
+    elif mailtype == 'AfterReject':
+        message = f'Your application has been rejected. Please try again.'
     email_from = settings.EMAIL_HOST_USER
     recepient_list = [email]
     send_mail(subject=subject, message=message, from_email=email_from, recipient_list=recepient_list)
@@ -259,8 +307,8 @@ def verify(request, auth_token):
         else:
             return HttpResponse("Invalid verification link.")
     except Exception as e:
-            print(e)
-            return HttpResponse("An error occurred during verification. Please try again.")   
+        print(e)
+        return HttpResponse("An error occurred during verification. Please try again.")   
 
 # views.py
 from rest_framework import viewsets
