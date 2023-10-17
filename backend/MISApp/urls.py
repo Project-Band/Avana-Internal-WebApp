@@ -40,8 +40,14 @@ urlpatterns = [
     # Terms and Conditions
     path('termsandconditions', views.get_terms_and_conditions, name='terms_and_conditions_list'),
 
+    # Programmer Profile
+    path('delete', views.delete_user, name = 'delete_user_profile'),
+    path('upgrade', views.upgrade_user, name = 'upgrade_user'),
+    path('sendpersonalmail', views.send_personal_email, name = 'send_personal_email'),
     
-    
+    # Enroll Requests
+    path('get_enroll_requests', views.get_enroll_requests, name = 'get_enroll_requests'),
+    path('accept_enroll_requests', views.accept_enroll_request, name = 'accept_enroll_requests'),
     
     # admin page
     path('useradmin/<str:username>/', views.AdminPageView.as_view(), name='admin_page'),

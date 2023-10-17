@@ -44,7 +44,7 @@ class Employee(models.Model):
     user_status = models.CharField(max_length=1, choices=USER_STATUS_CHOICES, default='W')
     
     def __str__(self):
-        return self.user.username
+        return self.first_name + ' ' +self.last_name
     
 # Project Model
 class Project(models.Model):

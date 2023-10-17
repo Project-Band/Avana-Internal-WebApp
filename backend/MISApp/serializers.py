@@ -5,11 +5,12 @@ from .models import Employee, TermsAndCondition, GENDER_CHOICES, Project
 
 class EmployeeSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
     img = serializers.ImageField(source='profile_image')
     
     class Meta:
         model = Employee
-        fields = ('id', 'name', 'img')
+        fields = ('id', 'name', 'img', 'username')
         
     def get_name(self, obj):
         # Combine the first, middle, and last names
@@ -18,6 +19,8 @@ class EmployeeSerializer(serializers.ModelSerializer):
             name += ' ' + obj.middle_name
         name += ' ' + obj.last_name
         return name.strip()
+    def get_username(self, obj):
+        return obj.user.username
         
 class TermsAndConditionsSerializer(serializers.ModelSerializer):
     class Meta:

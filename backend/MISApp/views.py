@@ -12,6 +12,9 @@ from rest_framework.views import APIView
 from .models import *
 from .serializers import *
 import uuid
+from rest_framework import viewsets
+from .models import Employee
+from .serializers import EmployeeSerializer
 
     
 class HomePageAPIView(generics.ListAPIView):
@@ -30,6 +33,7 @@ class HomePageAPIView(generics.ListAPIView):
 def get_applications(request):
     if request.method == 'GET':
         new_applicants = Employee.objects.filter(is_verified=True, user_status='W')
+        print(new_applicants)
         new_applicants_data = [
             {
                 "first_name": applicant.first_name,
@@ -43,6 +47,7 @@ def get_applications(request):
             } 
             for applicant in new_applicants
         ]
+        print('Success')
         return Response(new_applicants_data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
@@ -71,6 +76,84 @@ def reject_application(request):
         return Response({"message": "User deleted successfully"}, status=status.HTTP_200_OK)
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def get_enroll_requests(request):
+    if request.method == 'GET':
+        new_applicants = ProjectEnroll.objects.filter(enrollmentStatus='R')
+        new_applicants_data = [
+            {
+                "project": applicant.Project.project_name,
+                "employee": applicant.Employee.first_name + ' ' + applicant.Employee.last_name,  
+                "username": applicant.Employee.user.username
+            } 
+            for applicant in new_applicants
+        ]
+        return Response(new_applicants_data, status=status.HTTP_200_OK)
+@api_view(['POST'])
+def accept_enroll_request(request):
+    try:
+        project_name = request.data.get("project")
+        username = request.data.get("username")
+        
+        user = get_object_or_404(User, username = username) 
+        employee = get_object_or_404(Employee, user=user)
+        project = get_object_or_404(Project, project_name=project_name)
+        
+        enrollmentObj = get_object_or_404(Employee = employee, Project = project)
+        enrollmentObj.enrollmentStatus = 'A'
+        enrollmentObj.save()
+        send_email_after_registration(user.email, mailtype='AfterAccept')
+        return Response({"message": "User updated successfully"}, status=status.HTTP_200_OK)
+    except User.DoesNotExist or Employee.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+def delete_user(request):
+    try:
+        username = request.data.get("username")
+        user = get_object_or_404(User, username=username)
+        mail = user.email
+        # Delete user
+        user.delete()
+        send_email_after_registration(mail, mailtype='AfterDelete')
+        return Response({"message": "User deleted successfully"}, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+def upgrade_user(request):
+    try:
+        username = request.data.get("username")
+        user = get_object_or_404(User, username=username)
+        employee = get_object_or_404(Employee, user=user)
+        mail = user.email
+        if employee.user_status == 'P':
+            employee.user_status = 'A'
+        elif employee.user_status == 'A':
+            employee.user_status = 'P'
+        employee.save()
+        send_email_after_registration(mail, mailtype='AfterUpgrade')
+        return Response({"message": "User updated successfully"}, status=status.HTTP_200_OK)
+    except User.DoesNotExist or Employee.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['POST'])  
+def send_personal_email(request):
+    try:
+        username = request.data.get("username")
+        subject = request.data.get("subject")
+        content = request.data.get("content")
+        
+        user = get_object_or_404(User, username=username)
+        mail = user.email
+            
+        email_from = settings.EMAIL_HOST_USER
+        recepient_list = [mail]
+        send_mail(subject=subject, message=content, from_email=email_from, recipient_list=recepient_list)
+        return Response({"message": "Mail Sent"}, status=status.HTTP_200_OK)
+    except User.DoesNotExist or Employee.DoesNotExist:
+        return Response({"error": "Mail not sent"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
 def get_terms_and_conditions(request):
@@ -291,6 +374,11 @@ def send_email_after_registration(email, token = None, mailtype = 'AfterRegistra
         message = f'Your application has been accepted.'
     elif mailtype == 'AfterReject':
         message = f'Your application has been rejected. Please try again.'
+    elif mailtype == 'AfterDelete':
+        message = f'Your account has been deleted.'
+    elif mailtype == 'AfterUpgrade':
+        message = f'You have been promoted to an Architect.'
+        
     email_from = settings.EMAIL_HOST_USER
     recepient_list = [email]
     send_mail(subject=subject, message=message, from_email=email_from, recipient_list=recepient_list)
@@ -310,10 +398,6 @@ def verify(request, auth_token):
         print(e)
         return HttpResponse("An error occurred during verification. Please try again.")   
 
-# views.py
-from rest_framework import viewsets
-from .models import Employee
-from .serializers import EmployeeSerializer
 
 class EmployeeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Employee.objects.all()
