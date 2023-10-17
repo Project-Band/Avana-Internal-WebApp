@@ -47,8 +47,8 @@ urlpatterns = [
     
     # Enroll Requests
     path('get_enroll_requests', views.get_enroll_requests, name = 'get_enroll_requests'),
-    path('accept_enroll_requests', views.accept_enroll_request, name = 'accept_enroll_requests'),
-    
+    path('accept_enrollment', views.accept_enroll_request, name = 'accept_enroll_requests'),
+    path('reject_enrollment', views.reject_enroll_request, name = 'reject_enroll_requests'),
     # admin page
     path('useradmin/<str:username>/', views.AdminPageView.as_view(), name='admin_page'),
     

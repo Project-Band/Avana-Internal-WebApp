@@ -100,14 +100,33 @@ def accept_enroll_request(request):
         employee = get_object_or_404(Employee, user=user)
         project = get_object_or_404(Project, project_name=project_name)
         
-        enrollmentObj = get_object_or_404(Employee = employee, Project = project)
+        enrollmentObj = get_object_or_404(ProjectEnroll, Employee = employee, Project = project)
         enrollmentObj.enrollmentStatus = 'A'
         enrollmentObj.save()
+        
         send_email_after_registration(user.email, mailtype='AfterAccept')
         return Response({"message": "User updated successfully"}, status=status.HTTP_200_OK)
     except User.DoesNotExist or Employee.DoesNotExist:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
+@api_view(['POST'])
+def reject_enroll_request(request):
+    try:
+        project_name = request.data.get("project")
+        username = request.data.get("username")
+        
+        user = get_object_or_404(User, username = username) 
+        employee = get_object_or_404(Employee, user=user)
+        project = get_object_or_404(Project, project_name=project_name)
+        
+        enrollmentObj = get_object_or_404(ProjectEnroll, Employee = employee, Project = project)
+        enrollmentObj.enrollmentStatus = 'D'
+        enrollmentObj.save()
+        
+        send_email_after_registration(user.email, mailtype='AfterReject')
+        return Response({"message": "User updated successfully"}, status=status.HTTP_200_OK)
+    except User.DoesNotExist or Employee.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 @api_view(['POST'])
 def delete_user(request):
     try:
