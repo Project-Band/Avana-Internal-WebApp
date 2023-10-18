@@ -4,102 +4,128 @@ import { Close } from '@mui/icons-material'
 import React, { Fragment, useState } from 'react'
 import Link from 'next/link';
 import Button from './Button';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { ENROLL_REQUESTS_API, REGISTER_INFO_API } from '@/apiConfig';
 
 const Register = ({isVisible, onClose}) => {
 
     const [popup, setPopup] = useState("none")
     const [selectedImage, setSelectedImage] = useState("");
     const [passwordMatchError, setPasswordMatchError] = useState(false);
+    const [disable, setDisable] = useState(false)
 
     const [form, setForm] = useState({
         firstName: '',
         lastName: '',
         homeAddress: '',
         emailAddress: '',
-        pass:'',
-        confPass:'',
+        password:'',
+        confPassword:'',
         phone: '',
         username: '',
-        gender: ''
+        gender: '',
+        img:''
     })
+
+    console.log(selectedImage)
 
     const handleChange = (e) =>{
         setForm(prevForm => ({
             ...form,
             [e.target.name] : e.target.value
         }))
-        if (e.target.name === 'confPass') {
-            setPasswordMatchError(form.pass !== e.target.value);
+        if (e.target.name === 'confPassword') {
+            setPasswordMatchError(form.password !== e.target.value);
           }
     }
 
+    async function uploadImage(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+    
+        const response = await axios.post('/api/upload_image', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'X-Session-ID': '42fe4871f35ae4e74511a3cdc1d1c48f4a007e5da4d49c02'
+            }
+        });
+    
+        return response.data;
+    }
+
     const handleSubmit = async (e) => {
+        setDisable(true)
         e.preventDefault();
 
-        try {
-            const checkResponse = await fetch('localhost:8000/registerinfo', {
-              method: 'GET', // Use GET to retrieve data without modifying it
-            });
+        const formData = { ...form }
+        delete formData.confPassword;
+
+          
+        // try {
+        //     const checkResponse = await fetch('localhost:8000/registerinfo', {
+        //       method: 'GET', // Use GET to retrieve data without modifying it
+        //     });
         
-            if (checkResponse.ok) {
-              const existingData = await checkResponse.json();
-              const isUsernameExists = existingData.some(item => item.username === form.username);
-              const isEmailExists = existingData.some(item => item.email === form.email);
+        //     if (checkResponse.ok) {
+        //       const existingData = await checkResponse.json();
+        //       const isUsernameExists = existingData.some(item => item.username === form.username);
+        //       const isEmailExists = existingData.some(item => item.email === form.email);
         
-              if (isUsernameExists) {
-                window.alert('Username already exists. Please choose a different one.');
-                return;
-              }
+        //       if (isUsernameExists) {
+        //         window.alert('Username already exists. Please choose a different one.');
+        //         return;
+        //       }
         
-              if (isEmailExists) {
-                window.alert('Email already exists. Please use a different email.');
-                return;
-              }
-            } else {
-              window.alert('Failed to check existing data. Please try again later.');
-              return;
-            }
-          } catch (error) {
-            window.alert('Error checking data. Please check your internet connection.');
-            return;
-          }
+        //       if (isEmailExists) {
+        //         window.alert('Email already exists. Please use a different email.');
+        //         return;
+        //       }
+        //     } else {
+        //       window.alert('Failed to check existing data. Please try again later.');
+        //       return;
+        //     }
+        //   } catch (error) {
+        //     window.alert('Error checking data. Please check your internet connection.');
+        //     return;
+        //   }
     
         try {
-          const response = await fetch('localhost:8000/registerinfo', {
+          const response = await fetch(REGISTER_INFO_API, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(form),
+            body: JSON.stringify(formData),
           })
          
           if (response.ok) {
             // Successful registration
-            window.alert('You have successfully registered. Check your email.');
+            toast.success('You have successfully registered. Check your email.');
+            setDisable(true)
+            onClose()
           } else {
-              window.alert('Registration failed. Please try again later.');
+            setDisable(true)
+              toast.error('Registration failed. Please try again later.');
             }
         } catch (error) {
+            setDisable(false)
           // Handle network-related errors
           console.error('Error registering:', error);
-          window.alert('Error registering. Please check your internet connection.');
+          toast.error('Error registering. Please check your internet connection.');
         }
       };
 
     if(!isVisible) return null;
 
-    const handleClose = (e) => {
-        if(e.target.id==="closer") return onClose()
-    }
-
   return (
-    <div id="closer" onClick={handleClose} className='bg-black100 bg-opacity-25 fixed w-screen h-screen z-10 flex items-center justify-center backdrop-blur-sm'>
+    <div id="closer" className='bg-black100 bg-opacity-25 fixed w-screen h-screen z-10 flex items-center justify-center backdrop-blur-sm'>
         <div className='main relative flex flex-col mx-80 h-4/5 p-6 bg-white50 rounded-sm gap-8 shadow-lg'>
             <div className='flex justify-between items-center'>
                 <h3 className='text-primary'> Register </h3>
                 <div onClick={() => onClose()}><Close className='text-3xl rounded-sm hover:scale-105 border bg-red cursor-pointer text-white50'/></div>
             </div>
-            <form className='flex flex-col gap-8 pr-4 overflow-y-scroll' onSubmit={handleSubmit}>
+            <form className='flex flex-col gap-8 pr-4 overflow-y-scroll' onSubmit={disable? null : handleSubmit}>
                 <div className='flex gap-6'>
                     <div className='w-full'>
                         <label
@@ -180,7 +206,7 @@ const Register = ({isVisible, onClose}) => {
                     <input
                         type='password'
                         id='password'
-                        name='pass'
+                        name='password'
                         onChange={handleChange}
                         placeholder='Enter your password'
                         className='formInput'
@@ -197,7 +223,7 @@ const Register = ({isVisible, onClose}) => {
                     <input
                         type='password'
                         id='confPassword'
-                        name='confPass'
+                        name='confPassword'
                         onChange={handleChange}
                         placeholder='Confirm your password'
                         className='formInput'
@@ -251,9 +277,9 @@ const Register = ({isVisible, onClose}) => {
                             </label>
                             
                             <div className='flex w-full justify-between'>
-                                <label><input id='gender' type="radio" name="gender" value="male" onChange={handleChange} className='m-0' required/> Male</label>
-                                <label><input id='gender' type="radio" name="gender" value="female" onChange={handleChange} className='m-0' required/> Female</label>
-                                <label><input id='gender' type="radio" name="gender" value="other" onChange={handleChange} className='m-0' required/> Other</label>
+                                <label><input type="radio" name="gender" value="M" onChange={handleChange} className='m-0' required/> Male</label>
+                                <label><input type="radio" name="gender" value="F" onChange={handleChange} className='m-0' required/> Female</label>
+                                <label><input type="radio" name="gender" value="O" onChange={handleChange} className='m-0' required/> Other</label>
                             </div>
                             
                         </div>
@@ -265,6 +291,7 @@ const Register = ({isVisible, onClose}) => {
                         onChange={({ target }) => {
                             if (target.files) {
                             const file = target.files[0];
+                            form.img=uploadImage(file)
                             setSelectedImage(URL.createObjectURL(file));
                                 }
                         }}
@@ -276,13 +303,13 @@ const Register = ({isVisible, onClose}) => {
                             <span>Select Image</span>
                         )}
                         </div>
-                        <Button type="add" label="Upload Image" />
+                        <Button type={`${selectedImage ==""? `add`:`text`}`} label={`${selectedImage ==""? `Upload Image`:`Uploaded`}`}/>
                     </label>
                 </div>
                 <input
                     type='submit'
-                    value="Register"
-                    className='w-full flex h-max border text-white50 justify-center border-secondary gap-2 bg-primary py-2 px-4 rounded-full items-center cursor-pointer'
+                    value={`${disable? `Uploading Data`: 'Register'}`}
+                    className={`w-full flex h-max border text-white50 justify-center border-secondary gap-2 ${disable? `bg-grey100` : `bg-primary`} py-2 px-4 rounded-full items-center cursor-pointer`}
                 />
             </form>
         </div>

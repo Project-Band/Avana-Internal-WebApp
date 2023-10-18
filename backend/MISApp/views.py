@@ -12,11 +12,7 @@ from rest_framework.views import APIView
 from .models import *
 from .serializers import *
 import uuid
-from rest_framework import viewsets
-from .models import Employee
-from .serializers import EmployeeSerializer
-
-    
+   
 class HomePageAPIView(generics.ListAPIView):
     serializer_class = EmployeeSerializer
     def list(self, request, *args, **kwargs):
@@ -316,47 +312,6 @@ def test_enroll_request_view(request):
 
     return Response({"message": "Enrollment request created successfully."}, status=status.HTTP_200_OK)
 
-class AdminPageView(APIView):
-    # permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        # # Check if the user is an admin
-        # user = request.user
-        # employee = Employee.objects.filter(user=user).first()
-        
-        # if not employee or employee.user_status != 'X':  # Check existence and status 'X' for Admin
-        #     return Response({"error": "Access denied for this user status"}, status=status.HTTP_403_FORBIDDEN)
-
-
-        # New applicants
-        new_applicants = Employee.objects.filter(is_verified=True, user_status='W')
-        new_applicants_data = [{"name": f"{applicant.first_name} {applicant.last_name}", "email": applicant.user.email, "username": applicant.user.username} for applicant in new_applicants]
-
-        # Terms and conditions
-        terms_and_conditions = TermsAndCondition.objects.all()
-        terms_data = [{"title": term.title, "clause": term.clause} for term in terms_and_conditions]
-
-        # Programmer and Architect profiles
-        programmers_and_architects = Employee.objects.filter(user_status__in=['P', 'A'])
-        pa_data = [{"name": f"{pa.first_name} {pa.last_name}", "email": pa.user.email, "username": pa.user.username} for pa in programmers_and_architects]
-
-        # All projects
-        all_projects = Project.objects.all()
-        projects_data = [{"name": project.project_name, "description": project.project_description} for project in all_projects]
-
-        # Pending enrollment requests
-        pending_enrollments = ProjectEnroll.objects.filter(enrollmentStatus='R')
-        pending_data = [{"employee_name": f"{enrollment.Employee.first_name} {enrollment.Employee.last_name}", "project_name": enrollment.Project.project_name} for enrollment in pending_enrollments]
-
-        return Response({
-            'newapplicant': new_applicants_data,
-            'termsandconditions': terms_data,
-            'programmersprofile': pa_data,
-            'projects': projects_data,
-            'pendingenrollment': pending_data,
-        })
-
-
 class RequestEnrollView(APIView):
 
     def post(self, request, *args, **kwargs):
@@ -417,6 +372,70 @@ def verify(request, auth_token):
         print(e)
         return HttpResponse("An error occurred during verification. Please try again.")   
 
+@api_view(['POST'])
+def create_project(request):
+    project_name = request.data.get('projectTitle')
+    project_start_date = request.data.get('startDate')
+    project_end_date = request.data.get('endDate')
+    sections = request.data.get('sections')
+    
+    with transaction.atomic():
+        try:
+            # Create a new enrollment request with "Requested" status
+            Project.objects.create(project_name=project_name, project_start_date=project_start_date, project_end_date=project_end_date)
+        except:
+            return Response({"error": "Couldn't create project."}, status=status.HTTP_404_NOT_FOUND)
+        current_project = Project.objects.get(project_name=project_name)
+        try:
+            for section in sections:
+                ProjectSection.objects.create(
+                    project=current_project, 
+                    project_section_name=section.get('sectionTitle'), 
+                    project_section_description=section.get('sectionDesc')
+                )
+        except:
+            return Response({"error": "Cannot create one of the sections."}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({"message": "Enrollment request created successfully."}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_project(request):
+    if request.method == 'GET':
+        projects = Project.objects.all()
+        
+        def get_section(project):
+            sections = ProjectSection.objects.filter(project = project)
+            filtered_section = [{
+                "section_title": section.project_section_name,
+                "sectionDesc": section.project_section_description
+            } for section in sections]
+            return filtered_section
+            
+        def get_enrollment(project, status):
+            enrolls = ProjectEnroll.objects.filter(Project = project, enrollmentStatus = status)
+            employee_data = [{
+                "name": enroll.Employee.first_name + ' ' + enroll.Employee.last_name,
+                "status": enroll.enrollmentStatus
+            }
+                             for enroll in enrolls]
+            return employee_data
+        
+        project_data = [
+            {
+                "project_name": project.project_name,
+                "start_date": project.project_start_date,  
+                "end_date": project.project_end_date, 
+                "section":  get_section(project),
+                "current_members": get_enrollment(project, 'A')
+            } 
+            for project in projects
+        ]
+        print(project_data)
+        return Response(project_data, status=status.HTTP_200_OK)
+
+from rest_framework import viewsets
+from .models import Employee
+from .serializers import EmployeeSerializer
 
 class EmployeeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Employee.objects.all()

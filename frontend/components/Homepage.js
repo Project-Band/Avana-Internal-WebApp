@@ -21,20 +21,19 @@ const Homepage = () => {
       <Register isVisible={popupReg} onClose={() => setPopupReg(false)}/>
       <ToC isVisible={popupToC} onClose={()=>setPopupToC(false)}/>
       <div className='main h-screen relative py-6 flex flex-col gap-16 items-center justify-center'>
-          <div className='flex justify-between items-center w-2/5 h-max bg-white50 rounded-sm py-4 px-4'>
+          <div className='flex flex-row-reverse justify-between items-center min-w-300px w-1/2 h-max bg-white50 rounded-sm py-4 px-4 flex-wrap'>
             <Image 
               src='./avana_logo.svg'
               width={160}
               height={160}
               alt='Avana Logo'
             />
-            <div className='h-full border-l-grey50 border-l-2 shadow-md'></div>
             <div className='flex flex-col'>
                   <h3 className='text-primary'>Welcome to Avana</h3>
                   <p>Register or Login to proceed.</p>
             </div>
         </div>
-        <div className='flex flex-col p-5 w-2/5 bg-white50 rounded-sm shadow-lg gap-6'>
+        <div className='flex flex-col p-5 w-1/2 bg-white50 rounded-sm shadow-lg gap-6'>
           <Login TocPopup={()=>setPopupToC(true)}/>
           <div onClick={() => setPopupReg(true)}><Button type="register" /></div>
         </div>

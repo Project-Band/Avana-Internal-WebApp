@@ -10,7 +10,8 @@ import Mail from "./Mail";
 import EnrollProgrammers from "./EnrollProgrammers";
 import NewApplications from "./NewApplications";
 import ToC from "./ToC";
-import { withAuth } from "./withAuth";
+import withAuth from "./withAuth";
+import ArchProfile from "./ArchProfile";
 
 export{
     Homepage,
@@ -25,5 +26,6 @@ export{
     EnrollProgrammers,
     NewApplications,
     ToC,
-    withAuth
+    withAuth,
+    ArchProfile
 }

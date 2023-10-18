@@ -47,7 +47,7 @@ const Button = (props) => {
 
         case "text":
             return(
-                <div className='cursor-pointer text-base text-primary underline'>{props.label}</div>
+                <div className='cursor-pointer text-center text-base text-primary'>{props.label}</div>
             )
 
         case "profile":

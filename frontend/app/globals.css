@@ -58,7 +58,7 @@
   }
 
   .adminContent{
-    @apply bg-white50 w-full h-[568px] pl-8 pr-3 py-4 rounded-sm shadow-lg
+    @apply bg-white50 w-full h-full pl-8 pr-3 py-4 rounded-sm shadow-lg
   }
 
   p{
@@ -66,19 +66,19 @@
   }
 
   h1{
-    @apply text-3xl text-black150
+    @apply text-3xl text-black150 font-black
   }
 
   h2{
-    @apply text-2xl text-black150
+    @apply text-2xl text-black150 font-extrabold
   }
 
   h3{
-    @apply text-xl text-black150
+    @apply text-xl text-black150 font-bold
   }
 
   h4{
-    @apply text-lg text-black150
+    @apply text-lg text-black150 font-medium
   }
 
 }

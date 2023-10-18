@@ -50,7 +50,10 @@ urlpatterns = [
     path('accept_enrollment', views.accept_enroll_request, name = 'accept_enroll_requests'),
     path('reject_enrollment', views.reject_enroll_request, name = 'reject_enroll_requests'),
     # admin page
-    path('useradmin/<str:username>/', views.AdminPageView.as_view(), name='admin_page'),
+    # path('useradmin/<str:username>/', views.AdminPageView.as_view(), name='admin_page'),
     
+    # create project
+    path('create_project', views.create_project, name = 'create_project'),
+    path('view_project', views.get_project, name = 'view_project'),
     
 ]

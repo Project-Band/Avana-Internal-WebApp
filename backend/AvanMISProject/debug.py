@@ -132,3 +132,82 @@ def user_profile(request, user_id):
     context = {'employee': employee}
     return render(request, 'user_profile.html', context=context)
 
+
+class AdminPageView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        # # Check if the user is an admin
+        # user = request.user
+        # employee = Employee.objects.filter(user=user).first()
+        
+        # if not employee or employee.user_status != 'X':  # Check existence and status 'X' for Admin
+        #     return Response({"error": "Access denied for this user status"}, status=status.HTTP_403_FORBIDDEN)
+
+
+        # New applicants
+        new_applicants = Employee.objects.filter(is_verified=True, user_status='W')
+        new_applicants_data = [{"name": f"{applicant.first_name} {applicant.last_name}", "email": applicant.user.email, "username": applicant.user.username} for applicant in new_applicants]
+
+        # Terms and conditions
+        terms_and_conditions = TermsAndCondition.objects.all()
+        terms_data = [{"title": term.title, "clause": term.clause} for term in terms_and_conditions]
+
+        # Programmer and Architect profiles
+        programmers_and_architects = Employee.objects.filter(user_status__in=['P', 'A'])
+        pa_data = [{"name": f"{pa.first_name} {pa.last_name}", "email": pa.user.email, "username": pa.user.username} for pa in programmers_and_architects]
+
+        # All projects
+        all_projects = Project.objects.all()
+        projects_data = [{"name": project.project_name, "description": project.project_description} for project in all_projects]
+
+        # Pending enrollment requests
+        pending_enrollments = ProjectEnroll.objects.filter(enrollmentStatus='R')
+        pending_data = [{"employee_name": f"{enrollment.Employee.first_name} {enrollment.Employee.last_name}", "project_name": enrollment.Project.project_name} for enrollment in pending_enrollments]
+
+        return Response({
+            'newapplicant': new_applicants_data,
+            'termsandconditions': terms_data,
+            'programmersprofile': pa_data,
+            'projects': projects_data,
+            'pendingenrollment': pending_data,
+        })
+
+
+
+@csrf_exempt
+@api_view(['POST'])
+def test_enroll_request_view(request):
+    username = request.data.get("username")
+    project_name = request.data.get("project_name")
+    print(username, project_name)
+    if not username or not project_name:
+        return Response({"error": "Both username and project name are required."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    with transaction.atomic():
+        try:
+            # Get User and related Employee
+            user = User.objects.get(username=username)
+            employee = Employee.objects.get(user=user)
+
+            # Get Project
+            project = Project.objects.get(project_name=project_name)
+
+            # Check if enrollment request already exists
+            existing_request = ProjectEnroll.objects.filter(Employee=employee, Project=project).first()
+            if existing_request:
+                return Response({"error": "An enrollment request already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create a new enrollment request with "Requested" status
+            ProjectEnroll.objects.create(Employee=employee, Project=project, enrollmentStatus='R')
+        
+        except User.DoesNotExist:
+            return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        except Employee.DoesNotExist:
+            return Response({"error": "Employee does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        except Project.DoesNotExist:
+            return Response({"error": "Project does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return Response({"message": "Enrollment request created successfully."}, status=status.HTTP_200_OK)

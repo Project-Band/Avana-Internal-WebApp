@@ -1,57 +1,57 @@
 const projects=[
     {
         id:1,
-        name:"Project X",
+        name:"Project E",
         desc:"A little description about the project",
-        assgn:"Half Guy"
+        assgn:"C"
     },
     {
         id:2,
-        name:"Project X",
+        name:"Project A",
         desc:"A little description about the project",
-        assgn:"Unassigned"
+        assgn:"Y"
     },
     {
         id:3,
-        name:"Project X",
+        name:"Project F",
         desc:"A little description about the project",
-        assgn:"Half Guy"
+        assgn:"X"
     },
     {
         id:4,
-        name:"Project X",
+        name:"Project G",
         desc:"A little description about the project",
-        assgn:"Half Guy"
+        assgn:"C"
     },
     {
         id:5,
-        name:"Project X",
+        name:"Project B",
         desc:"A little description about the project",
-        assgn:"Unassigned"
+        assgn:"3"
     },
     {
         id:6,
-        name:"Project X",
+        name:"Project C",
         desc:"A little description about the project",
-        assgn:"Unassigned"
+        assgn:"2"
     },
     {
         id:7,
-        name:"Project X",
+        name:"Project H",
         desc:"A little description about the project",
-        assgn:"Half Guy"
+        assgn:"3"
     },
     {
         id:8,
-        name:"Project X",
+        name:"Project D",
         desc:"A little description about the project",
-        assgn:"Unassigned"
+        assgn:"1"
     },
     {
         id:9,
-        name:"Project X",
+        name:"Project I",
         desc:"A little description about the project",
-        assgn:"Half Guy"
+        assgn:"2"
     }
 ]
 

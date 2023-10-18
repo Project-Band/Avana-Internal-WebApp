@@ -58,6 +58,14 @@ class Project(models.Model):
     employees = models.ManyToManyField(Employee, through= 'ProjectEnroll')
     def __str__(self):
         return self.project_name
+
+# Project Section
+class ProjectSection(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project_section_name = models.CharField(max_length=100)
+    project_section_description = models.TextField(max_length=1000)
+    def __str__(self) -> str:
+        return str(self.Employee) + str(self.Project)
     
 # Terms and Conditions Model
 class TermsAndCondition(models.Model):
