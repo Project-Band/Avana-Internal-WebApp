@@ -40,19 +40,19 @@ const Register = ({isVisible, onClose}) => {
           }
     }
 
-    async function uploadImage(file) {
-        const formData = new FormData();
-        formData.append('file', file);
+    // async function uploadImage(file) {
+    //     const formData = new FormData();
+    //     formData.append('file', file);
     
-        const response = await axios.post(UPLOAD_IMAGE_API, formData)//, {
-        //     headers: {
-        //         'Content-Type': 'multipart/form-data',
-        //         'X-Session-ID': '42fe4871f35ae4e74511a3cdc1d1c48f4a007e5da4d49c02'
-        //     }
-        // });
+    //     const response = await axios.post(UPLOAD_IMAGE_API, formData)//, {
+    //     //     headers: {
+    //     //         'Content-Type': 'multipart/form-data',
+    //     //         'X-Session-ID': '42fe4871f35ae4e74511a3cdc1d1c48f4a007e5da4d49c02'
+    //     //     }
+    //     // });
         
-        return response.data;
-    }
+    //     return response.data;
+    // }
 
     const handleSubmit = async (e) => {
         console.log(form);
@@ -92,12 +92,10 @@ const Register = ({isVisible, onClose}) => {
         //   }
     
         try {
-          const response = await fetch(REGISTER_INFO_API, {
-            method: 'POST',
+          const response = await axios.post(REGISTER_INFO_API, formData, {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(formData),
           })
          
           if (response.ok) {
