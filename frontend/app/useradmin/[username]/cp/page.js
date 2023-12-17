@@ -13,10 +13,10 @@ const CreateProject = () => {
     sections: [],
   });
 
-  const handleInputChange = (e, currentSection) => {
+  const handleInputChange = (e, index) => {
     const { name, value, files } = e.target;
     const updatedSections = project.sections.map((section) =>
-      section === currentSection
+      section === index
         ? {
             ...section,
             [name]: name === 'sectionImage' ? files[0] : value,
@@ -40,32 +40,19 @@ const CreateProject = () => {
     e.preventDefault();
 
     try {
-      // const formData = new FormData();
-
-      // // Append JSON data
-      // formData.append('projectTitle', project.projectTitle);
-      // formData.append('startDate', project.startDate);
-      // formData.append('endDate', project.endDate);
-
-      // // Append section data (title and description)
-      // project.sections.forEach((section, index) => {
-      //   formData.append(`sections[${index}][sectionTitle]`, section.sectionTitle);
-      //   formData.append(`sections[${index}][sectionDesc]`, section.sectionDesc);
-      //   if (section.sectionImage) {
-      //     formData.append(`sections[${index}][sectionImage]`, section.sectionImage);
-      //   }
-      // });
+      console.log(project)
       const formData = { ...project }
-      console.log(formData.sections)
-      const response = await axios.post(CREATE_PROJECT_API, formData, {
+
+      console.log(formData)
+
+      const response = await axios.post(CREATE_PROJECT_API,formData,  {
         headers: {
           'Content-Type': 'multipart/form-data',
-        },
-      })
-      console.log(response)
+        }
+      });
+
       if (response.status === 200) {
         toast.success('Project Created Successfully');
-        // window.location.reload();
         // onClose();
       } else {
         toast.error('Couldn\'t create the project.');
@@ -125,8 +112,8 @@ const CreateProject = () => {
         </div>
         <div className="bg-primary py-1 w-full" />
         <h4 className="text-primary text-center">Project Sections</h4>
-        {project.sections.map((section, index) => (
-          <div key={index} className='flex flex-col gap-6 w-full'>
+        {project.sections.map((section) => (
+          <div key={section.id} className='flex flex-col gap-6 w-full'>
             <div className="flex flex-col gap-2 h-max">
               <input
                 type="text"
@@ -134,7 +121,7 @@ const CreateProject = () => {
                 className="formInput"
                 name="sectionTitle"
                 value={section.sectionTitle}
-                onChange={(e) => handleInputChange(e, index)}
+                onChange={(e) => handleInputChange(e, section)}
               />
             </div>
             <div className="flex flex-col gap-2 h-max">
@@ -143,7 +130,8 @@ const CreateProject = () => {
                 type="file"
                 accept="image/*"
                 name="sectionImage"
-                onChange={(e) => handleInputChange(e, index)}
+                alt="sectionImage"
+                onChange={(e) => handleInputChange(e, section)}
                 placeholder="Upload Project Image"
                 className='text-base h-[80px] text-black150 border-none file:w-full file:h-full file:cursor-pointer file:bg-white100  file:m-0 file:mt-1 file:text-black150 file:px-3 file:border-none'
               />)}
@@ -159,7 +147,7 @@ const CreateProject = () => {
               <h4 className="text-primary">Section Description</h4>
               <textarea
                 name="sectionDesc"
-                onChange={(e) => handleInputChange(e, index)}
+                onChange={(e) => handleInputChange(e, section)}
                 className="h-[200px] rounded-sm w-full p-3 focus:outline-none"
                 placeholder="Add Description of Project"
                 value={section.sectionDesc}

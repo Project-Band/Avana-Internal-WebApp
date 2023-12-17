@@ -13,6 +13,7 @@ from .models import *
 from .serializers import *
 import uuid
 import requests
+from django.http import QueryDict
 
 class HomePageAPIView(generics.ListAPIView):
     serializer_class = EmployeeSerializer
@@ -379,10 +380,14 @@ def verify(request, auth_token):
 
 @api_view(['POST'])
 def create_project(request):
-    project_name = request.data.get('projectTitle')
-    project_start_date = request.data.get('startDate')
-    project_end_date = request.data.get('endDate')
-    sections = request.data.get('sections')
+    if isinstance(request.data, QueryDict):
+        data = parse_nested_formdata(request.data)
+    else:
+        data = request.data
+    project_name = data.get('projectTitle')
+    project_start_date = data.get('startDate')
+    project_end_date = data.get('endDate')
+    sections = data.get('sections')
     print(sections)
     print(request.data)
     with transaction.atomic():

@@ -83,3 +83,39 @@ def getsectionimageurl(obj):
     if obj.project_section_image:
         return obj.project_section_image.url
     return None
+
+def parse_nested_formdata(formdata):
+    data = {}
+    for key in formdata:
+        parts = key.split('[')
+        if len(parts) > 1:
+            main_key = parts[0]
+            sub_keys = [part.replace(']', '') for part in parts[1:]]
+            sub_data = data.setdefault(main_key, [])
+
+            current_level = sub_data
+            for i, sub_key in enumerate(sub_keys):
+                if sub_key.isdigit():
+                    sub_key = int(sub_key)
+                    while len(current_level) <= sub_key:
+                        current_level.append({})
+                    if i == len(sub_keys) - 1:
+                        current_level[sub_key] = formdata.getlist(key)[0] if len(formdata.getlist(key)) == 1 else formdata.getlist(key)
+                    else:
+                        current_level = current_level[sub_key]
+                else:
+                    if isinstance(current_level, list):
+                        if not current_level:
+                            current_level.append({})
+                        if i == len(sub_keys) - 1:
+                            current_level[0][sub_key] = formdata.get(key)
+                        else:
+                            current_level = current_level[0].setdefault(sub_key, [])
+                    elif isinstance(current_level, dict):
+                        if i == len(sub_keys) - 1:
+                            current_level[sub_key] = formdata.get(key)
+                        else:
+                            current_level = current_level.setdefault(sub_key, [])
+        else:
+            data[key] = formdata.get(key)
+    return data
