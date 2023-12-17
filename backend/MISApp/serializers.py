@@ -71,3 +71,15 @@ class ProjectSerializer(serializers.ModelSerializer):
 class EnrollRequestSerializer(serializers.Serializer):
     username = serializers.CharField(required = True)
     project_name = serializers.CharField(required = True)
+    
+    
+def geturl(obj):
+    if obj.profile_image:
+        return obj.profile_image.url
+    return None
+
+def getsectionimageurl(obj):
+    return obj.project_section_image.url
+    if obj.project_section_image:
+        return obj.project_section_image.url
+    return None

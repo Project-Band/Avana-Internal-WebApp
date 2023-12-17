@@ -41,7 +41,7 @@ def get_applications(request):
                 "phone": applicant.phone_number,
                 "home_address":applicant.home_address,
                 "gender": applicant.gender,
-                "image": applicant.profile_image
+                "image": request.build_absolute_uri(geturl(applicant))
             } 
             for applicant in new_applicants
         ]
@@ -222,6 +222,7 @@ class ProgrammerRegistrationView(generics.CreateAPIView):
             send_email_after_registration(user_data['email'], auth_token)
             
         headers = self.get_success_headers(serializer.data)
+        print(Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers))
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 @api_view(['POST'])
@@ -272,7 +273,7 @@ def user_projects_view(request, username):
         "title": employee.user_status,
         "homeAddress": employee.home_address,
         "phone": employee.phone_number,
-        
+        "img" : request.build_absolute_uri(geturl(employee)),
         "enrolled_projects": ProjectSerializer(enrolled_projects, many=True).data,
         "requested_projects": ProjectSerializer(requested_projects, many=True).data,
         "not_enrolled_projects": ProjectSerializer(not_enrolled_projects, many=True).data,
@@ -382,25 +383,27 @@ def create_project(request):
     project_start_date = request.data.get('startDate')
     project_end_date = request.data.get('endDate')
     sections = request.data.get('sections')
-    
+    print(sections)
+    print(request.data)
     with transaction.atomic():
         try:
             # Create a new enrollment request with "Requested" status
-            Project.objects.create(project_name=project_name, project_start_date=project_start_date, project_end_date=project_end_date)
+            new_project = Project.objects.create(project_name=project_name, project_start_date=project_start_date, project_end_date=project_end_date)
+            print("Project Created.")
+            if sections: 
+                for section in sections:
+                    ProjectSection.objects.create(
+                        project=new_project, 
+                        project_section_name=section.get('sectionTitle'), 
+                        project_section_description=section.get('sectionDesc'),
+                        project_section_image = section.get('sectionImage')
+                    )
+            print("Project sections Created.")
         except:
-            return Response({"error": "Couldn't create project."}, status=status.HTTP_404_NOT_FOUND)
-        current_project = Project.objects.get(project_name=project_name)
-        try:
-            for section in sections:
-                ProjectSection.objects.create(
-                    project=current_project, 
-                    project_section_name=section.get('sectionTitle'), 
-                    project_section_description=section.get('sectionDesc')
-                )
-        except:
+            print("Cannot create one of the sections.")
             return Response({"error": "Cannot create one of the sections."}, status=status.HTTP_404_NOT_FOUND)
 
-    return Response({"message": "Enrollment request created successfully."}, status=status.HTTP_200_OK)
+    return Response({"message": "Project created successfully."}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def get_project(request):
@@ -411,7 +414,8 @@ def get_project(request):
             sections = ProjectSection.objects.filter(project = project)
             filtered_section = [{
                 "section_title": section.project_section_name,
-                "sectionDesc": section.project_section_description
+                "sectionDesc": section.project_section_description,
+                "sectionImage": request.build_absolute_uri(getsectionimageurl(section))
             } for section in sections]
             return filtered_section
             
@@ -444,25 +448,3 @@ from .serializers import EmployeeSerializer
 class EmployeeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
-    
-    
-@api_view(['POST'])
-def upload_image(request):
-    # Get the file from request
-    file = request.FILES['file']
-
-    # Make a POST request to the PhotoPrism server with the file
-    headers = {'X-Session-ID': '42fe4871f35ae4e74511a3cdc1d1c48f4a007e5da4d49c02'}
-    response = requests.post('http://35.224.74.50/api/v1/photos', files={'file': file}, headers=headers)
-
-    # Return the response from the PhotoPrism server
-    return Response(response.json(), status=status.HTTP_201_CREATED)
-
-@api_view(['GET'])
-def view_images(request):
-    # Make a GET request to the PhotoPrism server
-    headers = {'X-Session-ID': '42fe4871f35ae4e74511a3cdc1d1c48f4a007e5da4d49c02'}
-    response = requests.get('http://35.224.74.50/api/v1/photos', headers=headers)
-
-    # Return the response from the PhotoPrism server
-    return Response(response.json(), status=status.HTTP_200_OK)

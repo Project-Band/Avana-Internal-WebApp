@@ -7,7 +7,7 @@ import { LocationCity, Mail, Phone } from '@mui/icons-material';
 import { usePathname } from 'next/navigation';
 import projects from '@/content/projects';
 import toast from 'react-hot-toast';
-import { USER_API } from '@/apiConfig';
+import { USER_API, ENROLL_REQUESTS_API } from '@/apiConfig';
 
 
 const profile = () => {
@@ -134,7 +134,7 @@ const profile = () => {
             <Header username={userData && userData.username}/>
             <div className='flex items-center justify-between'>
                 <div className='flex gap-4 items-center'>
-                    <Image src="http://35.232.216.253/uploads/original/f8/88/6bee943c18b8ba921f7eed571af2.jpg" width={80} height={80} layout="fixed" className='border-2 h-[80px] object-cover object-top overflow-hidden rounded-full border-secondary'/>
+                    <Image src={userData && userData.img} width={80} height={80} layout="fixed" className='border-2 h-[80px] object-cover object-top overflow-hidden rounded-full border-secondary'/>
                     <div className='flex flex-col'>
                         <h3 className='text-primary'>{userData && userData.firstName} {userData && userData.lastName}</h3>
                         <p>{userData && userData.title}</p>

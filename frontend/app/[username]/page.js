@@ -73,14 +73,14 @@ const logged = () => {
 
   const programmers = profile.programmers? profile.programmers.map(items => (
     <div className='flex flex-col items-center gap-4'>
-      <div className='relative w-24 h-24'><Image src={`http://35.232.216.253/uploads/original/f8/88/6bee943c18b8ba921f7eed571af2.jpg`} fill={true} objectFit='cover' className='border-2 object-top overflow-hidden rounded-full border-secondary object-cover'/></div>
+      <div className='relative w-24 h-24'><Image src={items.img} fill={true} objectFit='cover' className='border-2 object-top overflow-hidden rounded-full border-secondary object-cover'/></div>
       <p>{items.name}</p>
     </div>
   )): null
     
   const architects = profile.architects? profile.architects.map(items =>(
     <div className='flex flex-col items-center gap-4'>
-      <div className='relative w-24 h-24'><Image src={`http://35.232.216.253/uploads/original/f8/88/6bee943c18b8ba921f7eed571af2.jpg`} fill={true} objectFit='cover' className='border-2 object-top overflow-hidden rounded-full border-secondary object-cover'/></div>
+      <div className='relative w-24 h-24'><Image src={items.img} fill={true} objectFit='cover' className='border-2 object-top overflow-hidden rounded-full border-secondary object-cover'/></div>
       <p>{items.name}</p>
     </div>
   )):null
@@ -97,7 +97,7 @@ const logged = () => {
           />
           <div className='flex justify-between bg-white50 rounded-sm grow py-4 px-4'>
               <div className='flex gap-4 items-center'>
-                  <Image src="http://35.232.216.253/uploads/original/f8/88/6bee943c18b8ba921f7eed571af2.jpg" width={40} height={40} layout="fixed" className='border-2 h-[40px] object-cover object-top overflow-hidden rounded-full border-secondary'/>
+                  {/* <Image src="http://35.232.216.253/uploads/original/f8/88/6bee943c18b8ba921f7eed571af2.jpg" width={40} height={40} layout="fixed" className='border-2 h-[40px] object-cover object-top overflow-hidden rounded-full border-secondary'/> */}
                   <h4 className='text-primary capitalize font-bold'>{username}</h4>
               </div>
               <div className='flex gap-4'>

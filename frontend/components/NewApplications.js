@@ -84,7 +84,22 @@ const NewApplications = ({isVisible, username, onClose}) => {
   };
 
     const applicationList = applicant? applicant.map(items =>(
-        <div className='flex gap-10 w-full'>
+      <div>
+          <div className='flex justify-between items-center'>
+          <div className='flex gap-40 items-center'>
+              <div className='flex gap-4 items-center'>
+                  <Image src={items.image} width={60} height={60} layout="fixed" className='border-2 h-[60px] object-cover object-top overflow-hidden rounded-full border-secondary'/>
+                  <h3 className='text-primary'>{username}</h3>
+              </div>
+              <div className='flex gap-4'>
+                  <div onClick={() => handleAccept(username)}><Button label="Accept" type="accept" /></div>
+                  <div onClick={() => handleReject(username)}><Button label="Decline" type="decline" /></div>
+              </div>
+          </div>
+          <div onClick={() => onClose()}><Close className='text-3xl hover:scale-105 border bg-red cursor-pointer rounded-sm text-white50'/></div>
+      </div>
+      <div className='bg-white50 h-4/5 w-full rounded-sm relative'>
+          <div className='flex gap-10 w-full'>
             <div className='flex flex-col gap-6 w-full'>
                 <div className='flex gap-2 w-full items-center'>
                     <p className='text-primary w-2/5'>Name:</p>
@@ -114,6 +129,8 @@ const NewApplications = ({isVisible, username, onClose}) => {
                 </div>
             </div>
         </div>
+      </div>
+      </div>
     )):null
 
     if(!isVisible) return null;
@@ -125,22 +142,7 @@ const NewApplications = ({isVisible, username, onClose}) => {
   return (
     <div id='closer' onClick={handleClose} className='fixed flex w-screen h-screen inset-0 bg-black150 bg-opacity-20 backdrop-blur-sm justify-center items-center'>
         <div className='flex flex-col w-4/5 h-max p-6 bg-white50 gap-8 rounded-sm shadow-lg'>
-            <div className='flex justify-between items-center'>
-                <div className='flex gap-40 items-center'>
-                    <div className='flex gap-4 items-center'>
-                        <Image src="/demo.png" width={60} height={60} layout="fixed" className='border-2 h-[60px] object-cover object-top overflow-hidden rounded-full border-secondary'/>
-                        <h3 className='text-primary'>{username}</h3>
-                    </div>
-                    <div className='flex gap-4'>
-                        <div onClick={() => handleAccept(username)}><Button label="Accept" type="accept" /></div>
-                        <div onClick={() => handleReject(username)}><Button label="Decline" type="decline" /></div>
-                    </div>
-                </div>
-                <div onClick={() => onClose()}><Close className='text-3xl hover:scale-105 border bg-red cursor-pointer rounded-sm text-white50'/></div>
-            </div>
-            <div className='bg-white50 h-4/5 w-full rounded-sm relative'>
-                {applicationList}
-            </div>
+           {applicationList}
         </div>
     </div>
   )

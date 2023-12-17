@@ -94,11 +94,11 @@ const Register = ({isVisible, onClose}) => {
         try {
           const response = await axios.post(REGISTER_INFO_API, formData, {
             headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'multipart/form-data',
             },
           })
-         
-          if (response.ok) {
+          console.log(response);
+          if (response.status === 201) {
             // Successful registration
             toast.success('You have successfully registered. Check your email.');
             setDisable(true)

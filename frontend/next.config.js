@@ -3,7 +3,7 @@ const nextConfig = {
     // assetPrefix: "/Avana/",
     // output: "export"
     images: {
-        domains: ['35.232.216.253'],
+        domains: ['35.232.216.253', '127.0.0.1'],
     },
     
 }

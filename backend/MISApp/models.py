@@ -64,8 +64,9 @@ class ProjectSection(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     project_section_name = models.CharField(max_length=100)
     project_section_description = models.TextField(max_length=1000)
+    project_section_image = models.ImageField(blank=True, null=True, upload_to="images/")
     def __str__(self) -> str:
-        return str(self.Employee) + str(self.Project)
+        return str(self.project_section_name)
     
 # Terms and Conditions Model
 class TermsAndCondition(models.Model):

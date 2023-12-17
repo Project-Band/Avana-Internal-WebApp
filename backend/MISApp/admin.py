@@ -19,3 +19,7 @@ class EnrollAdmin(admin.ModelAdmin):
     list_display = ['enrollmentStatus', 'Project', 'Employee']
 admin.site.register(models.ProjectEnroll, EnrollAdmin)
 
+class SectionAdmin(admin.ModelAdmin):
+    list_display = ['project_section_name',  'project', 'project_section_image']
+admin.site.register(models.ProjectSection, SectionAdmin)
+

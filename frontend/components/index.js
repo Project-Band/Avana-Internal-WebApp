@@ -12,6 +12,7 @@ import NewApplications from "./NewApplications";
 import ToC from "./ToC";
 import withAuth from "./withAuth";
 import ArchProfile from "./ArchProfile";
+import Project from "./Project";
 
 export{
     Homepage,
@@ -27,5 +28,6 @@ export{
     NewApplications,
     ToC,
     withAuth,
-    ArchProfile
+    ArchProfile,
+    Project
 }

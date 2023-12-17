@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
 import React, { useState } from 'react';
 import { Button } from '@/components';
 import toast from 'react-hot-toast';
 import { CREATE_PROJECT_API } from '@/apiConfig';
-
+import axios from 'axios';
 const CreateProject = () => {
   const [project, setProject] = useState({
     projectTitle: '',
@@ -13,11 +13,17 @@ const CreateProject = () => {
     sections: [],
   });
 
-  const handleInputChange = (e, index) => {
-    const { name, value } = e.target;
-    const updatedSections = [...project.sections];
-    updatedSections[index] = { ...updatedSections[index], [name]: value };
-    setProject({ ...project, sections: updatedSections });
+  const handleInputChange = (e, currentSection) => {
+    const { name, value, files } = e.target;
+    const updatedSections = project.sections.map((section) =>
+      section === currentSection
+        ? {
+            ...section,
+            [name]: name === 'sectionImage' ? files[0] : value,
+          }
+        : section
+    );
+   setProject({ ...project, sections: updatedSections });
   };
 
   const handleAddSection = () => {
@@ -32,22 +38,38 @@ const CreateProject = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
-      const response = await fetch(CREATE_PROJECT_API, {
-        method: 'POST',
+      // const formData = new FormData();
+
+      // // Append JSON data
+      // formData.append('projectTitle', project.projectTitle);
+      // formData.append('startDate', project.startDate);
+      // formData.append('endDate', project.endDate);
+
+      // // Append section data (title and description)
+      // project.sections.forEach((section, index) => {
+      //   formData.append(`sections[${index}][sectionTitle]`, section.sectionTitle);
+      //   formData.append(`sections[${index}][sectionDesc]`, section.sectionDesc);
+      //   if (section.sectionImage) {
+      //     formData.append(`sections[${index}][sectionImage]`, section.sectionImage);
+      //   }
+      // });
+      const formData = { ...project }
+      console.log(formData.sections)
+      const response = await axios.post(CREATE_PROJECT_API, formData, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
-        body: JSON.stringify(project),
       })
-     
-      if (response.ok) {
+      console.log(response)
+      if (response.status === 200) {
         toast.success('Project Created Successfully');
-        onClose()
+        // window.location.reload();
+        // onClose();
       } else {
-          toast.error('Couldn\'t create the project.');
-        }
+        toast.error('Couldn\'t create the project.');
+      }
     } catch (error) {
       toast.error('Error creating Project. Please check your internet connection.');
     }
@@ -117,14 +139,21 @@ const CreateProject = () => {
             </div>
             <div className="flex flex-col gap-2 h-max">
               <h4 className="text-primary">Upload Section Image (optional)</h4>
-              <input
+              {!section.sectionImage && (<input
                 type="file"
                 accept="image/*"
                 name="sectionImage"
                 onChange={(e) => handleInputChange(e, index)}
                 placeholder="Upload Project Image"
                 className='text-base h-[80px] text-black150 border-none file:w-full file:h-full file:cursor-pointer file:bg-white100  file:m-0 file:mt-1 file:text-black150 file:px-3 file:border-none'
-              />
+              />)}
+              {section.sectionImage && (
+                <img
+                  src={URL.createObjectURL(section.sectionImage)}
+                  alt="Selected Image"
+                  className="mt-2 h-[80px] object-contain bg-white100"
+                />
+              )}
             </div>
             <div className="flex flex-col gap-2 h-max w-full">
               <h4 className="text-primary">Section Description</h4>

@@ -53,7 +53,7 @@ const pp = () => {
     <div id="popupOpenerP" onClick={(e) => handlePopup(e, items.username)} className="cursor-pointer w-full px-8 py-4 border bg-white0 border-grey50 rounded-sm justify-start items-center gap-6 inline-flex hover:shadow-sm hover:scale-[1.01] hover:bg-white100">
     <div id="popupOpenerP" className="grow shrink basis-0 justify-between items-center flex">
         <div id="popupOpenerP" className='flex gap-4 items-center'>
-            <Image id="popupOpenerP" src="/demo.png" width={50} height={50} layout="fixed" className='border-2 h-[50px] object-cover object-top overflow-hidden rounded-full border-secondary'/>
+            <Image id="popupOpenerP" src={items.img} width={50} height={50} layout="fixed" className='border-2 h-[50px] object-cover object-top overflow-hidden rounded-full border-secondary'/>
             <div id="popupOpenerP" className='flex flex-col'>
                 <p id="popupOpenerP" className='text-primary'>{items.name}</p>
                 <p id="popupOpenerP" className='text-sm'>Programmer</p>
@@ -68,7 +68,7 @@ const pp = () => {
     <div id="popupOpenerA" onClick={(e) => handlePopup(e, items.username)} className="cursor-pointer w-full px-8 py-4 border bg-white0 border-grey50 rounded-sm justify-start items-center gap-6 inline-flex hover:shadow-sm hover:scale-[1.01] hover:bg-white100">
     <div id="popupOpenerA" className="grow shrink basis-0 justify-between items-center flex">
         <div id="popupOpenerA" className='flex gap-4 items-center'>
-            <Image id="popupOpenerA" src="/demo.png" width={50} height={50} layout="fixed" className='border-2 h-[50px] object-cover object-top overflow-hidden rounded-full border-secondary'/>
+            <Image id="popupOpenerA" src={items.img} width={50} height={50} layout="fixed" className='border-2 h-[50px] object-cover object-top overflow-hidden rounded-full border-secondary'/>
             <div id="popupOpenerA" className='flex flex-col'>
                 <p id="popupOpenerA" className='text-primary'>{items.name}</p>
                 <p id="popupOpenerA" className='text-sm'>Architect</p>
