@@ -40,7 +40,7 @@ class Employee(models.Model):
     home_address = models.CharField(max_length=100, blank=True, null=True)
     phone_number = models.CharField(max_length=10, blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='O')
-    profile_image = models.ImageField(blank=True, null=True)
+    profile_image = models.ImageField(blank=True, null=True, upload_to="images/")
     user_status = models.CharField(max_length=1, choices=USER_STATUS_CHOICES, default='W')
     
     def __str__(self):

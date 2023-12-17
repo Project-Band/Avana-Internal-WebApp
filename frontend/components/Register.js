@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Button from './Button';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { ENROLL_REQUESTS_API, REGISTER_INFO_API } from '@/apiConfig';
+import { ENROLL_REQUESTS_API, REGISTER_INFO_API, UPLOAD_IMAGE_API } from '@/apiConfig';
 
 const Register = ({isVisible, onClose}) => {
 
@@ -25,7 +25,7 @@ const Register = ({isVisible, onClose}) => {
         phone: '',
         username: '',
         gender: '',
-        img:''
+        file : null,
     })
 
     console.log(selectedImage)
@@ -44,17 +44,18 @@ const Register = ({isVisible, onClose}) => {
         const formData = new FormData();
         formData.append('file', file);
     
-        const response = await axios.post('/api/upload_image', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                'X-Session-ID': '42fe4871f35ae4e74511a3cdc1d1c48f4a007e5da4d49c02'
-            }
-        });
-    
+        const response = await axios.post(UPLOAD_IMAGE_API, formData)//, {
+        //     headers: {
+        //         'Content-Type': 'multipart/form-data',
+        //         'X-Session-ID': '42fe4871f35ae4e74511a3cdc1d1c48f4a007e5da4d49c02'
+        //     }
+        // });
+        
         return response.data;
     }
 
     const handleSubmit = async (e) => {
+        console.log(form);
         setDisable(true)
         e.preventDefault();
 
@@ -290,9 +291,12 @@ const Register = ({isVisible, onClose}) => {
                         hidden
                         onChange={({ target }) => {
                             if (target.files) {
-                            const file = target.files[0];
-                            form.img=uploadImage(file)
-                            setSelectedImage(URL.createObjectURL(file));
+                            const currentFile = target.files[0];
+                            setForm((prevForm) => ({
+                                ...prevForm,
+                                file: currentFile,
+                            }))
+                            setSelectedImage(URL.createObjectURL(currentFile));
                                 }
                         }}
                         />

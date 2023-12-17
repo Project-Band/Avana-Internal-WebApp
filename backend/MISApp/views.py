@@ -12,7 +12,8 @@ from rest_framework.views import APIView
 from .models import *
 from .serializers import *
 import uuid
-   
+import requests
+
 class HomePageAPIView(generics.ListAPIView):
     serializer_class = EmployeeSerializer
     def list(self, request, *args, **kwargs):
@@ -39,7 +40,8 @@ def get_applications(request):
                 "username": applicant.user.username,
                 "phone": applicant.phone_number,
                 "home_address":applicant.home_address,
-                "gender": applicant.gender
+                "gender": applicant.gender,
+                "image": applicant.profile_image
             } 
             for applicant in new_applicants
         ]
@@ -202,6 +204,8 @@ class ProgrammerRegistrationView(generics.CreateAPIView):
             'home_address': serializer.validated_data['homeAddress'],
             'phone_number': serializer.validated_data['phone'],
             'gender': serializer.validated_data['gender'],
+            'profile_image': serializer.validated_data['file'],
+            # 'profile_image': serializer.validated_data['file']
             # 'is_verified': serializer.validated_data['verified']
         }
 
@@ -440,3 +444,25 @@ from .serializers import EmployeeSerializer
 class EmployeeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
+    
+    
+@api_view(['POST'])
+def upload_image(request):
+    # Get the file from request
+    file = request.FILES['file']
+
+    # Make a POST request to the PhotoPrism server with the file
+    headers = {'X-Session-ID': '42fe4871f35ae4e74511a3cdc1d1c48f4a007e5da4d49c02'}
+    response = requests.post('http://35.224.74.50/api/v1/photos', files={'file': file}, headers=headers)
+
+    # Return the response from the PhotoPrism server
+    return Response(response.json(), status=status.HTTP_201_CREATED)
+
+@api_view(['GET'])
+def view_images(request):
+    # Make a GET request to the PhotoPrism server
+    headers = {'X-Session-ID': '42fe4871f35ae4e74511a3cdc1d1c48f4a007e5da4d49c02'}
+    response = requests.get('http://35.224.74.50/api/v1/photos', headers=headers)
+
+    # Return the response from the PhotoPrism server
+    return Response(response.json(), status=status.HTTP_200_OK)

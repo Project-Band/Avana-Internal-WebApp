@@ -56,4 +56,9 @@ urlpatterns = [
     path('create_project', views.create_project, name = 'create_project'),
     path('view_project', views.get_project, name = 'view_project'),
     
+    
+    # images
+    path('api/upload_image', views.upload_image),
+    path('api/view_images', views.view_images),
+    
 ]

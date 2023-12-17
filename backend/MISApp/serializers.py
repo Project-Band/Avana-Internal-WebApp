@@ -40,6 +40,7 @@ class EmployeeRegistrationSerializer(serializers.Serializer):
     phone = serializers.CharField(max_length=10)
     username = serializers.CharField()
     gender = serializers.ChoiceField(choices=[(choice[0], choice[0]) for choice in GENDER_CHOICES])
+    file = serializers.ImageField()
 
     def create(self, validated_data):
         # This will not actually be used for creating objects directly,

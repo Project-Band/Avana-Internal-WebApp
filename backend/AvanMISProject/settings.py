@@ -124,6 +124,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_ROOT = '/media/'
+MEDIA_ROOT_URL = os.path.join(BASE_DIR, 'media')
+STATTICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -145,6 +150,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "chrome-extension://gmmkjpcadciiokjpikmkkmapphbmdjok",
+    
 ]
 
 
