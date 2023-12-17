@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation';
@@ -25,6 +25,31 @@ const AdminNavbar = (props) => {
       setToggle(6);
     }
   };
+  const [userData, setUserData] = useState([]);
+
+  const initialData = useRef(userData);
+  
+useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(USER_API(props.username));
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+  
+        // Check if the data has changed significantly before updating state.
+        if (JSON.stringify(data) !== JSON.stringify(initialData.current)) {
+          setUserData(data);
+          initialData.current = data;
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    console.log(userData);
+    fetchData(); // Call the fetch function when the component mounts
+  }, []);
 
 
   // Use useEffect to update the selected section when the route changes
@@ -39,7 +64,7 @@ const AdminNavbar = (props) => {
   return (
     <div className='flex flex-col bg-white50 shadow-lg w-[25%] min-w-[230px] h-full pt-6 rounded-sm overflow-hidden gap-10'>
         <div className='flex flex-col gap-4 items-center'>
-            <Image src="http://35.232.216.253/uploads/original/f8/88/6bee943c18b8ba921f7eed571af2.jpg" width={80} height={80} layout="fixed" className='border-2 h-[80px] object-cover object-top overflow-hidden rounded-full border-secondary'/>
+            {/* <Image src={userData && userData.image} width={80} height={80} layout="fixed" className='border-2 h-[80px] object-cover object-top overflow-hidden rounded-full border-secondary'/> */}
             <div className='flex flex-col items-center text-center'>
                 <h3 className='text-primary capitalize'>{props.username}</h3>
                 <p>Admin</p>
