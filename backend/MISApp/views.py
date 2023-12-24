@@ -13,8 +13,10 @@ from .models import *
 from .serializers import *
 import uuid
 import requests
-from django.http import QueryDict
-
+from django.http import QueryDict, HttpResponse
+import os
+from dotenv import load_dotenv
+load_dotenv()
 class HomePageAPIView(generics.ListAPIView):
     serializer_class = EmployeeSerializer
     def list(self, request, *args, **kwargs):
@@ -22,6 +24,7 @@ class HomePageAPIView(generics.ListAPIView):
         programmer_users = Employee.objects.filter(user_status='P')
         architect_serializer = self.get_serializer(architect_users, many=True)
         programmer_serializer = self.get_serializer(programmer_users, many=True)
+        print(os.environ.get('BACKEND_URL'))
         return Response({
             'programmers': programmer_serializer.data,
             'architects': architect_serializer.data
@@ -349,7 +352,8 @@ class RequestEnrollView(APIView):
 
 def send_email_after_registration(email, token = None, mailtype = 'AfterRegistration'):
     subject = 'Verify your account'
-    message = f'Use this link to verify your account  http://127.0.0.1:8000/verify/{token}. T&C will also be sent here.'
+    backend_url = os.environ.get('BACKEND_URL')
+    message = f'Use this link to verify your account  {backend_url}/verify/{token}. T&C will also be sent here.'
     if mailtype == 'AfterAccept':
         message = f'Your application has been accepted.'
     elif mailtype == 'AfterReject':
